@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>晨崗數學勇者‧周界篇 - 平面圖形周界計算 RPG</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    box-sizing: border-box;
+    background-color: #0f172a;
+    font-family: 'Noto Sans TC', "Microsoft JhengHei", "PingFang HK", sans-serif;
+  }
+
+  .pixel-font {
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  .pixel-box {
+    border: 3px solid #000;
+    box-shadow: 0 4px 0 #000;
+  }
+
+  .pixel-btn {
+    border: 3px solid #000;
+    box-shadow: 0 4px 0 #000;
+    transition: transform 0.08s, box-shadow 0.08s, background-color 0.15s;
+  }
+
+  .pixel-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #000;
+  }
+
+  .tool-toggle.active {
+    background-color: #f59e0b !important;
+    color: #0f172a !important;
+    border-color: #fef08a !important;
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #000;
+  }
+
+  /* 8-bit 經典 2 幀呼吸微動畫（身體上下起伏 1 格，地面陰影保持不動） */
+  @keyframes spriteBob {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-2.5px); }
+  }
+  .sprite-body-anim {
+    animation: spriteBob 0.9s steps(2, end) infinite;
+  }
+
+  @keyframes monsterShake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-12px, 0); }
+    40% { transform: translate(12px, 0); }
+    60% { transform: translate(-12px, 0); }
+    80% { transform: translate(12px, 0); }
+    100% { transform: translate(0, 0); }
+  }
+  .shake { animation: monsterShake 0.4s ease-in-out; }
+
+  @keyframes slashAnim {
+    0% { opacity: 0; transform: scale(0.4) rotate(-45deg); }
+    50% { opacity: 1; transform: scale(1.3) rotate(0deg); }
+    100% { opacity: 0; transform: scale(1.6) rotate(45deg); }
+  }
+  .slash { animation: slashAnim 0.35s ease-out forwards; }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-42px) scale(1.2); }
+  }
+  .dmg-float { animation: floatUp 0.75s ease-out forwards; }
+
+  /* 復古 JRPG 舞台底襯，讓 1px 黑框與白羽翼同時清晰呈現 */
+  .rpg-pedestal-bg {
+    background: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 68%, #cbd5e1 69%, #94a3b8 100%);
+  }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+</style>
+</head>
+<body class="w-full h-full text-slate-100 flex items-center justify-center p-1 sm:p-2 select-none">
+
+  <!-- 主遊戲容器 -->
+  <div class="w-full h-full max-w-6xl bg-slate-800 rounded-xl pixel-box border-2 border-slate-700 flex flex-col justify-between overflow-hidden relative p-1.5 sm:p-2.5">
+
+    <!-- ================= 1. 登入與角色選擇畫面 ================= -->
+    <div id="screen-login" class="w-full h-full flex flex-col items-center justify-between p-2 sm:p-4 overflow-y-auto">
+      
+      <div class="text-center space-y-1">
+        <span class="bg-amber-500 text-black px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase">SEN 特教數學互動遊戲</span>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-amber-400 drop-shadow-[0_3px_0_#000]">晨崗數學勇者‧周界篇</h1>
+        <p class="text-slate-300 text-sm sm:text-base">平面圖形周界計算 RPG 冒險（配備方格、軟尺、繩段工具）</p>
+      </div>
+
+      <!-- 學生個人資料輸入區 -->
+      <div class="w-full max-w-md bg-slate-700/80 p-3 sm:p-4 rounded-xl border-2 border-slate-600 space-y-2">
+        <div class="flex items-center space-x-2">
+          <label class="w-16 font-extrabold text-lg text-amber-300">班別：</label>
+          <input type="text" id="input-class" placeholder="例：3A" class="flex-1 p-2 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-lg focus:outline-none">
+        </div>
+        <div class="flex items-center space-x-2">
+          <label class="w-16 font-extrabold text-lg text-amber-300">姓名：</label>
+          <input type="text" id="input-name" placeholder="請輸入姓名" class="flex-1 p-2 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-lg focus:outline-none">
+        </div>
+      </div>
+
+      <!-- 24x24 經典黑框點陣角色形象選擇 -->
+      <div class="w-full max-w-2xl text-center space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-200">請選擇你的勇者職業：</h2>
+        <div class="grid grid-cols-4 gap-2 sm:gap-3" id="hero-selector">
+          <div onclick="selectHero(0)" id="hero-card-0" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-amber-400 flex flex-col items-center transition transform active:scale-95">
+            <div id="hero-preview-0" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">熱血騎士</span>
+          </div>
+          <div onclick="selectHero(1)" id="hero-card-1" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+            <div id="hero-preview-1" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">魔法女傑</span>
+          </div>
+          <div onclick="selectHero(2)" id="hero-card-2" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+            <div id="hero-preview-2" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">森林遊俠</span>
+          </div>
+          <div onclick="selectHero(3)" id="hero-card-3" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+            <div id="hero-preview-3" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">星光聖女</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 可折疊 Google Form 設定 -->
+      <details class="w-full max-w-md text-slate-400 text-xs bg-slate-800/90 p-2 rounded-lg border border-slate-700">
+        <summary class="cursor-pointer text-slate-300 font-bold hover:text-amber-400">⚙️ 教師專用：Google Form 自動紀錄設定</summary>
+        <div class="mt-2 space-y-1.5">
+          <div>
+            <label class="block text-[10px]">表單回應 URL (action endpoint):</label>
+            <input type="text" id="gform-url" value="https://docs.google.com/forms/d/e/1FAIpQLSfhsIItFh878kFK7_KYMIrwKm8YXltbS4RPQa83QB6oQxciPQ/formResponse" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <div><label class="block text-[10px]">姓名 Entry ID:</label><input type="text" id="gform-entry-name" value="entry.1390982118" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
+            <div><label class="block text-[10px]">班別 Entry ID:</label><input type="text" id="gform-entry-class" value="entry.656823273" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
+            <div><label class="block text-[10px]">錯誤數 Entry ID:</label><input type="text" id="gform-entry-errors" value="entry.642911833" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
+            <div><label class="block text-[10px]">耗時(秒) Entry ID:</label><input type="text" id="gform-entry-time" value="entry.810879329" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
+          </div>
+          <div><label class="block text-[10px]">錯題紀錄 Entry ID:</label><input type="text" id="gform-entry-logs" value="entry.1300890948" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
+        </div>
+      </details>
+
+      <button onclick="startGame()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xl sm:text-2xl px-10 py-3 rounded-xl tracking-wider my-1">
+        ⚔️ 開始冒險 ⚔️
+      </button>
+    </div>
+
+
+    <!-- ================= 2. 遊戲主要戰鬥與周界計算畫面 ================= -->
+    <div id="screen-game" class="hidden w-full h-full flex flex-col justify-between overflow-hidden gap-1.5 sm:gap-2">
+      
+      <!-- ① 頂部 HUD 狀態欄 -->
+      <div class="h-[42px] sm:h-[46px] bg-slate-900/95 px-2 sm:px-3 py-1 rounded-lg border-2 border-slate-700 flex items-center justify-between shadow-md shrink-0">
+        <!-- 生命值與攻擊力 -->
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <div id="hearts-container" class="flex space-x-0.5"></div>
+          <div class="bg-slate-800 border border-amber-400 px-1.5 py-0.5 rounded text-amber-400 font-bold pixel-font text-[10px] sm:text-xs">
+            STR:<span id="player-str">10</span>
+          </div>
+        </div>
+
+        <!-- 關卡與題型分層標籤 -->
+        <div class="flex items-center space-x-1.5">
+          <span id="level-title" class="pixel-font bg-amber-500 text-slate-950 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded font-black text-[10px] sm:text-xs border border-black">
+            LEVEL 1
+          </span>
+          <span id="level-tier-desc" class="hidden md:inline-block bg-slate-800 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded text-xs font-bold">
+            正方形/長方形・全標尺寸
+          </span>
+        </div>
+
+        <!-- 怪物 HP -->
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+          <span id="monster-name-tag" class="text-xs font-bold text-slate-300 hidden sm:inline">史萊姆王</span>
+          <div class="w-24 sm:w-36 bg-black p-0.5 rounded border border-slate-500 relative">
+            <div id="monster-hp-bar" class="h-3.5 sm:h-4 bg-red-600 rounded transition-all duration-300" style="width: 100%;"></div>
+            <span id="monster-hp-text" class="absolute inset-0 flex items-center justify-center text-[10px] sm:text-[11px] font-black text-white drop-shadow-[0_1px_2px_#000]">
+              40 / 40
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② 中間主舞台：左側勇者 + 中央【主顯示框（平面圖形與工具）】 + 右側怪物 -->
+      <div class="flex-1 min-h-0 flex items-stretch gap-1.5 sm:gap-2">
+        
+        <!-- 左側勇者區（復古 JRPG 舞台底襯，凸顯 24x24 黑框點陣角色） -->
+        <div class="w-20 sm:w-28 rpg-pedestal-bg rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center p-1.5 shrink-0 relative shadow-inner">
+          <div id="player-sprite" class="w-16 h-16 sm:w-24 sm:h-24 transition transform"></div>
+          <span id="display-player-name" class="mt-1 bg-slate-900/90 border border-slate-700 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-full">
+            勇者
+          </span>
+          <span id="streak-badge" class="mt-1 bg-slate-900/85 border border-amber-400/80 px-1.5 py-0.5 rounded text-[10px] font-bold text-amber-300">
+            🔥 0/3
+          </span>
+        </div>
+
+        <!-- 中央主顯示框 (Main Display Box) -->
+        <div id="stage-container" class="flex-1 min-w-0 h-full bg-slate-950 rounded-xl border-2 sm:border-4 border-amber-400 relative overflow-hidden flex flex-col">
+          <!-- 頂部圖形名稱與操作提示條 -->
+          <div class="w-full bg-slate-900/90 border-b border-slate-700 px-2.5 py-1 flex items-center justify-between gap-2 shrink-0 z-10">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span id="shape-title-badge" class="bg-sky-500/20 text-sky-300 border border-sky-400/60 px-2 py-0.5 rounded text-xs font-extrabold whitespace-nowrap">
+                長方形
+              </span>
+              <span id="stage-prompt-text" class="text-xs sm:text-sm font-bold text-slate-200 truncate">
+                請計算下圖的周界（單位：cm）
+              </span>
+            </div>
+            <button id="btn-reset-tool" onclick="resetToolOverlay()" class="hidden bg-slate-700 hover:bg-slate-600 text-amber-300 border border-amber-400/60 px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap shrink-0">
+              🔄 重置測量
+            </button>
+          </div>
+
+          <!-- 畫布區域（繪製直線平面圖形、尺寸標註、方格背景、軟尺、繩段） -->
+          <div class="flex-1 min-h-0 w-full relative" style="touch-action: none;">
+            <canvas id="mainCanvas" class="w-full h-full block"></canvas>
+          </div>
+
+          <!-- 軟尺／繩段展開結果浮層（當完成量度時顯示於畫布底部） -->
+          <div id="unfold-banner" class="hidden w-full bg-slate-900/95 border-t-2 border-amber-400 px-2 py-1 shrink-0 z-10">
+            <div id="unfold-warn-text" class="hidden text-center text-xs sm:text-sm font-bold text-rose-300 py-0.5"></div>
+            <canvas id="unfoldCanvas" class="hidden w-full h-[38px] block"></canvas>
+          </div>
+        </div>
+
+        <!-- 右側怪物區（復古 JRPG 舞台底襯，凸顯 24x24 黑框點陣 Boss） -->
+        <div class="w-20 sm:w-28 rpg-pedestal-bg rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center p-1.5 shrink-0 relative shadow-inner">
+          <!-- 斬擊與傷害飄字特效 -->
+          <div id="slash-effect" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none text-amber-500 z-20">
+            <svg class="w-16 h-16 sm:w-24 sm:h-24 slash" viewBox="0 0 100 100">
+              <path d="M 10 90 L 90 10 L 80 5 L 5 85 Z" fill="currentColor" stroke="#000" stroke-width="4"/>
+            </svg>
+          </div>
+          <div id="damage-text" class="hidden absolute top-2 font-black text-2xl sm:text-4xl text-yellow-300 drop-shadow-[0_3px_0_#000] pixel-font dmg-float z-30 pointer-events-none">
+            -10
+          </div>
+
+          <div id="monster-sprite" class="w-16 h-16 sm:w-24 sm:h-24 transition transform"></div>
+          <span id="display-monster-name" class="mt-1 bg-red-950/90 border border-red-700 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-red-200 truncate max-w-full">
+            史萊姆王
+          </span>
+        </div>
+
+      </div>
+
+      <!-- ③ 下方：作答位置 + 一旁的輔助工具選項 -->
+      <div class="min-h-[78px] sm:min-h-[86px] bg-slate-900/95 p-1.5 sm:p-2 rounded-xl border-2 border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 shrink-0">
+        
+        <!-- 作答位置（左側/主要輸入區） -->
+        <div class="flex items-center justify-center md:justify-start gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border-2 border-amber-400 shrink-0">
+          <span class="text-amber-300 font-black text-base sm:text-xl whitespace-nowrap">周界 =</span>
+          <input type="number" id="ans-input" inputmode="numeric" pattern="[0-9]*" placeholder="?" min="1" max="99"
+            onkeydown="if(event.key==='Enter') checkAnswer()"
+            class="w-20 sm:w-24 h-11 sm:h-12 rounded-lg bg-slate-950 text-amber-300 border-2 border-amber-400 text-center text-2xl sm:text-3xl font-black focus:outline-none focus:ring-2 focus:ring-amber-300">
+          <span class="text-white font-black text-base sm:text-xl">cm</span>
+          <button onclick="checkAnswer()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-xl px-4 sm:px-6 h-11 sm:h-12 rounded-xl whitespace-nowrap ml-1">
+            ⚔️ 攻擊
+          </button>
+        </div>
+
+        <!-- 一旁的輔助工具選項（方格工具、軟尺、繩段） -->
+        <div class="flex-1 flex items-center justify-between gap-1.5 sm:gap-2 bg-slate-800/90 px-2.5 py-1.5 rounded-xl border-2 border-sky-500/60 min-w-0">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-sky-300 font-extrabold text-xs sm:text-sm hidden lg:inline">🛠️ 輔助工具：</span>
+            <button id="tool-grid" onclick="toggleTool('grid')" class="pixel-btn tool-toggle bg-slate-700 hover:bg-slate-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center gap-1">
+              <span>🏁</span><span>方格紙</span>
+            </button>
+            <button id="tool-ruler" onclick="toggleTool('ruler')" class="pixel-btn tool-toggle bg-slate-700 hover:bg-slate-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center gap-1">
+              <span>📏</span><span>軟尺</span>
+            </button>
+            <button id="tool-string" onclick="toggleTool('string')" class="pixel-btn tool-toggle bg-slate-700 hover:bg-slate-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center gap-1">
+              <span>🧶</span><span>繩段</span>
+            </button>
+          </div>
+
+          <!-- 工具即時輔助狀態（方格計數器 / 操作說明） -->
+          <div id="tool-status-area" class="flex-1 flex items-center justify-end gap-1.5 min-w-0">
+            <span id="tool-idle-hint" class="text-[11px] sm:text-xs text-slate-300 font-bold truncate">
+              點選工具可開啟方格背景、軟尺或繩段
+            </span>
+            <div id="grid-count-panel" class="hidden items-center gap-1.5">
+              <span class="text-xs font-bold text-emerald-300 whitespace-nowrap">已數：</span>
+              <span id="grid-count-val" class="bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded text-sm sm:text-base">0 cm</span>
+              <button onclick="resetToolOverlay()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-500 px-1.5 py-0.5 rounded text-xs font-bold">歸零</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= 3. 特教動態鷹架 Modal ================= -->
+    <div id="modal-scaffold" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+      <div class="bg-slate-800 border-4 border-amber-400 rounded-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 text-center shadow-2xl relative">
+        <div class="text-2xl sm:text-3xl font-black text-amber-400">💡 差一點點就對了！再試試看！</div>
+        
+        <div class="bg-slate-900 p-3 sm:p-4 rounded-xl border-2 border-slate-700 text-left space-y-2.5">
+          <p class="text-base sm:text-lg font-bold text-slate-200">周界計算小秘訣：</p>
+          <div class="p-2.5 bg-amber-500/20 border-l-4 border-amber-400 rounded text-amber-200 text-sm sm:text-base font-bold">
+            1. 周界就是圖形 <span class="bg-yellow-300 text-black px-1.5 py-0.5 rounded">最外圍一圈</span> 所有邊長的總和！
+          </div>
+          <div id="scaffold-detail" class="p-2.5 bg-sky-500/20 border-l-4 border-sky-400 rounded text-sky-200 text-sm sm:text-base font-bold"></div>
+          <div class="text-slate-300 pt-1 text-xs sm:text-sm border-t border-slate-700">
+            👉 小提示：你也可以點選下方的 <span class="text-amber-300 font-bold">「🏁 方格紙」</span> 或 <span class="text-amber-300 font-bold">「🧶 繩段」</span> 輔助量度喔！
+          </div>
+        </div>
+
+        <button onclick="closeScaffoldModal()" class="pixel-btn w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xl sm:text-2xl py-3 rounded-xl">
+          我知道了！繼續挑戰！
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ================= 4. 寶箱獎勵 Modal ================= -->
+    <div id="modal-chest" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-800 border-4 border-yellow-400 rounded-2xl max-w-md w-full p-5 text-center space-y-4 shadow-2xl">
+        <div class="text-4xl">🎁</div>
+        <h3 class="text-xl sm:text-2xl font-black text-yellow-400">連續答對 3 題！獲得寶箱！</h3>
+        <p class="text-slate-300 text-sm sm:text-base">點擊寶箱開啟獎勵：</p>
+        
+        <div onclick="openTreasureChest()" id="chest-icon" class="cursor-pointer my-2 py-6 bg-slate-900 rounded-xl border-4 border-dashed border-yellow-400 text-5xl sm:text-6xl hover:scale-105 transition transform">
+          📦
+        </div>
+
+        <div id="chest-result" class="hidden space-y-3">
+          <div id="chest-item-name" class="text-xl font-bold text-emerald-400">獲得：小刀 (STR +1)</div>
+          <button onclick="closeChestModal()" class="pixel-btn w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-lg py-2.5 rounded-xl">
+            太棒了！
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= 5. 通關與成績結算 Modal ================= -->
+    <div id="modal-victory" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-800 border-4 border-amber-400 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+        <div class="text-5xl animate-bounce">🏆</div>
+        <h2 class="text-2xl sm:text-3xl font-black text-amber-400">《晨崗數學勇者‧周界篇》通關！</h2>
+        
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-left space-y-2 text-slate-200 text-base sm:text-lg">
+          <p>👑 勇者姓名：<span id="summary-name" class="font-bold text-amber-300"></span> (<span id="summary-class" class="font-bold text-amber-300"></span>)</p>
+          <p>⏱️ 總遊戲耗時：<span id="summary-time" class="font-bold text-emerald-400"></span> 秒</p>
+          <p>⭐ 總累積錯誤：<span id="summary-errors" class="font-bold text-amber-400"></span> 次</p>
+          <p class="text-xs text-slate-400 pt-2 border-t border-slate-800">（學習數據已成功自動整理傳送）</p>
+        </div>
+
+        <button onclick="location.reload()" class="pixel-btn w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xl py-3 rounded-xl">
+          🔄 再次挑戰
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* iOS Safari 手勢放大防止 */
+document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+
+/* ================= 24x24 經典黑框點陣圖渲染引擎 ================= */
+const PIXEL_PALETTE = {
+  '.': null,        // 透明
+  'K': '#090d16',   // 1px 銳利黑框 / 陰影
+  'W': '#ffffff',   // 純白 / 高光
+  'S': '#fed7aa',   // 暖膚色
+  'Y': '#fde047',   // 亮金黃
+  'O': '#ea580c',   // 深橘核心
+  'R': '#ef4444',   // 亮紅
+  'B': '#3b82f6',   // 皇家藍
+  'b': '#1d4ed8',   // 深藍
+  'C': '#22d3ee',   // 亮青藍
+  'G': '#22c55e',   // 翠綠
+  'g': '#15803d',   // 森林深綠
+  'L': '#a3e635',   // 萊姆綠
+  'P': '#c084fc',   // 星光紫
+  'M': '#f472b6',   // 亮粉紅
+  'm': '#db2777',   // 深粉紅
+  'E': '#f1f5f9',   // 銀白 / 骨白
+  'e': '#94a3b8',   // 鋼灰
+  'd': '#475569',   // 暗岩灰
+  'N': '#b45309',   // 暖木棕
+  'n': '#78350f'    // 深木棕
+};
+
+const SPRITE_MATRICES = {
+  // 0. 熱血騎士 (24x24)：紅羽銀盔、藍甲披風、像素寬劍與盾牌
+  hero_0: [
+    "........KKKKK...........",
+    ".......KRRRRRK..........",
+    "......KRRRRRYYK.........",
+    ".....KRRRRRRKKKK........",
+    "....KRRRRRRKEEEEK.......",
+    "....KRRRRRKEWWWWK.......",
+    "....KKKKKKSSSSSSK.......",
+    ".....KSSSSKSSSSKK.......",
+    ".....KSSSSKSSSSKK.......",
+    ".....KSSSSSSSSSSK.......",
+    "......KKKKKKKKKK....KK..",
+    "....KKBBBBBBBBBBK..KEEK.",
+    "..KKEEKBBBBBBBBBK.KEWEK.",
+    ".KKEBBKBBBBYYYBBK.KEWEK.",
+    ".KKEBBKBBBBBBBBBK.KEWEK.",
+    ".KKEBBKBBBBBBBBBK.KEEK..",
+    ".KKEBBKBBBBBBBBBK.KKKK..",
+    "..KKKK.KBBBBBBBBK.KYYK..",
+    ".......KbbKKKKbbK..KK...",
+    ".......KbbKKKKbbK.......",
+    "......KeeKKKKKKeeK......",
+    "......KKKKKKKKKKKK......",
+    "....KKKKKKKKKKKKKKKK....",
+    "........................"
+  ],
+  // 1. 魔法女傑 (24x24)：金邊青藍尖帽、金色長髮、粉紅法袍與星光法杖
+  hero_1: [
+    ".........KKKKK..........",
+    "........KYYYYYK.........",
+    ".......KYYCCCYYK........",
+    "......KCCCCCCCCCK.......",
+    ".....KCCCCCCCCCCCK......",
+    "...KKKKKKKKKKKKKKKKK....",
+    "..KYYYYCCCCCCCCCYYYYK...",
+    "...KKKKKKKKKKKKKKKKK....",
+    "....KYYSSSSSSSSSYYK.....",
+    "....KYSSKSSSSSKSSYK.....",
+    "....KYSSKSSSSSKSSYK.....",
+    "....KYYSSSSSSSSSYYK..KK.",
+    ".....KKKKKKKKKKKKK..KYYK",
+    "....KMMMMMYYYMMMMMK.KYYK",
+    "...KMMMMMMMYYMMMMMMK.KNK",
+    "...KMMKMMMMMMMMMKMMK.KNK",
+    "...KMMKMMMMMMMMMKMMKKKNK",
+    "...KKKKMMMMMMMMMKKKK.KNK",
+    "......KMMMMMMMMMK....KNK",
+    "......KmmMMMMMmmK....KNK",
+    ".....KmmKKKKKKKmmK...KNK",
+    ".....KKKKKKKKKKKKK...KKK",
+    "...KKKKKKKKKKKKKKKKK....",
+    "........................"
+  ],
+  // 2. 森林遊俠 (24x24)：綠羽獵帽、森林綠短袍與木製長弓
+  hero_2: [
+    ".......KKKKKKK..........",
+    "......KGGGGGGGK..KK.....",
+    ".....KGGGGGGGGGKKYYK....",
+    "....KGGGGGGGGGGGKYYK....",
+    "...KKKKKKKKKKKKKKKK.....",
+    "....KNNSSSSSSSSSK.......",
+    "....KNNSSKSSSSKSSK......",
+    "....KNNSSKSSSSKSSK......",
+    "....KNNSSSSSSSSSSK..KK..",
+    ".....KKKKKKKKKKKK..KNNK.",
+    "....KLLLLLYYLLLLLKKNK.EK",
+    "...KLLLLLLYYLLLLLLNK..EK",
+    "...KLLKLLLLLLLLKLLNK..EK",
+    "...KLLKLLLLLLLLKLLNK..EK",
+    "...KLLKLLLLLLLLKLLNK..EK",
+    "...KKKKLLLLLLLLKKKKNK.EK",
+    "......KggggggggK...KNKEK",
+    "......KggKKKKggK....KNNK",
+    "......KggKKKKggK.....KK.",
+    ".....KNNKKKKKKKKNNK.....",
+    ".....KKKKKKKKKKKKKK.....",
+    "........................",
+    "...KKKKKKKKKKKKKKKK.....",
+    "........................"
+  ],
+  // 3. 星光聖女 (24x24)：金色懸浮光環、紫色長髮、純白天使羽翼與地面投影
+  hero_3: [
+    "......KKKKKKKKK.........",
+    ".....KYYYYYYYYYK........",
+    ".....KYYKKKKKYYK........",
+    "......KKKKKKKKK.........",
+    ".....KPPPPPPPPPK........",
+    "....KPPPPPPPPPPPK.......",
+    "...KPPPSSSSSSSSSPPK.....",
+    "...KPPSSKSSSSSKSSPPK....",
+    "...KPPSSKSSSSSKSSPPK....",
+    "...KPPPSSSSSSSSSPPPK.KK.",
+    ".KK.KKKKKKKKKKKKKK.KKWWK",
+    "KWWKKWWWWWYYYYWWWWWKKWWK",
+    "KWWWKWWWWWYYYYWWWWWKWKWK",
+    "KWWWKWWKWWWWWWWWKWWKWKWK",
+    ".KWWKWWKWWWWWWWWKWWKWWK.",
+    "..KKKKWKWWWWWWWWKWKKKK..",
+    ".....KKKKWWWWWWKKKK.....",
+    ".......KYYYYYYYYK.......",
+    ".......KWWWWWWWWK.......",
+    "........KKKKKKKK........",
+    "........................",
+    "........................",
+    ".....KKKKKKKKKKKKKK.....",
+    ".......KKKKKKKKKK......."
+  ],
+  // Level 1 怪物：史萊姆王 (24x24)
+  monster_1: [
+    "........................",
+    "........KK....KK........",
+    ".......KYYK..KYYK.......",
+    ".......KYYYYYYYYK.......",
+    ".......KKKKKKKKKK.......",
+    "......KGGGGGGGGGGK......",
+    "....KKGGGGGGGGGGGGKK....",
+    "...KGGWWGGGGGGGGGGGGK...",
+    "..KGGWWGGGGGGGGGGGGGGK..",
+    ".KGGGGGGGGGGGGGGGGGGGGK.",
+    ".KGGGGKWKGGGGGGKWKGGGGK.",
+    "KGGGGGKWWKGGGGKWWKGGGGGK",
+    "KGGGGGKWWKGGGGKWWKGGGGGK",
+    "KGGGGGGKKGGGGGGKKGGGGGGK",
+    "KGGGGGGGGGGGGGGGGGGGGGGK",
+    "KggggGGGGKKKKKKGGGGggggK",
+    ".KggggggKRRRRRRKggggggK.",
+    ".KgggggggKKKKKKgggggggK.",
+    "..KggggggggggggggggggK..",
+    "...KKKKKKKKKKKKKKKKKK...",
+    "........................",
+    "........................",
+    "..KKKKKKKKKKKKKKKKKKKK..",
+    "........................"
+  ],
+  // Level 2 怪物：森林哥布林 (24x24)
+  monster_2: [
+    "........................",
+    ".......KKKKKKKKKK.......",
+    ".....KKggggggggggKK.....",
+    ".KKKKggggggggggggggKKKK.",
+    "KggggggggggggggggggggggK",
+    ".KKKKgggKYYKggKYYKgggKK.",
+    "....KgggKYYKggKYYKgggK..",
+    "....KggggggggggggggggK..",
+    ".....KgggKWWWWWWKgggK...",
+    "......KKKKWKKKKWKKKK..KK",
+    ".....KNNNNNNNNNNNNNNKKnK",
+    "....KNNNKNNNNNNNNKNNKKnK",
+    "....KNNNKNNNNNNNNKNNKnKK",
+    "....KNNNKNNNNNNNNKNNKnK.",
+    "....KKKKKNNNNNNNNKKKnnK.",
+    "........KNNNNNNNNK.KNNK.",
+    "........KnnKKKKnnK.KNNK.",
+    "........KnnKKKKnnK..KK..",
+    ".......KgggKKKKgggK.....",
+    ".......KKKKKKKKKKKK.....",
+    "........................",
+    "........................",
+    "...KKKKKKKKKKKKKKKKKK...",
+    "........................"
+  ],
+  // Level 3 怪物：骷髏騎士 (24x24)
+  monster_3: [
+    "......KKKKKKKKKKK.......",
+    ".....KEEEEEEEEEEEK......",
+    "....KEEEEEEEEEEEEEK.....",
+    "....KEEEKKKKEEKKKKEK....",
+    "....KEEEKKKKEEKKKKEK....",
+    "....KEEEEEEEKKKEEEEK....",
+    ".....KEEEEEEEEEEEEK.....",
+    "......KEKWKEKWKEKK......",
+    ".......KKKKKKKKKK....KK.",
+    "....KKKRRRRRRRRRRKK.KEEK",
+    "...KRRRKEEEEEEEEKRK.KEWK",
+    "..KRRRRKEKKKKKKEKRK.KEWK",
+    "..KRRRRKEEEEEEEEKRK.KEWK",
+    "..KRRRRKEKKKKKKEKRK.KEWK",
+    "..KRRRRKEEEEEEEEKRKKKEEK",
+    "..KRRRR.KKKKKKKKKK..KYYK",
+    "...KKK..KeeKKKKeeK...KK.",
+    "........KeeKKKKeeK......",
+    ".......KEEEKKKKKEEEK....",
+    "........KKKKKKKKKKK.....",
+    "........................",
+    "........................",
+    "...KKKKKKKKKKKKKKKKKK...",
+    "........................"
+  ],
+  // Level 4 怪物：岩石巨人 (24x24)
+  monster_4: [
+    ".....KKKKKKKKKKKKK......",
+    "....KeeeeeeeeeeeeeK.....",
+    "...KeeeeeeeeeeeeeeeK....",
+    "..KeeeeKYYKeeeeKYYKeeK..",
+    "..KeeeeKOOKeeeKOOOKeeK..",
+    ".KKKeeeeeeeeeeeeeeeKKK..",
+    "KdddKeeeeeeeeeeeeeKdddK.",
+    "KdddddeeeeeeeeeeeeeddddK",
+    "KdddddeeeeKOOOOOeeeedddK",
+    "KdddddeeeKOOYYYOOeeedddK",
+    "KdddddeeeeKOOOOOeeeedddK",
+    "KdddddeeeeeeeeeeeeeddddK",
+    "KddddKeeeeeeeeeeeeeKddddK",
+    ".KKKK.KeeeeeeeeeeeK.KKKK.",
+    "......KdddddddddddK.....",
+    "......KddddKKKddddK.....",
+    ".....KdddddKKKdddddK....",
+    ".....KdddddKKKdddddK....",
+    "....KddddddKKddddddK....",
+    "....KKKKKKKKKKKKKKKKK...",
+    "........................",
+    "........................",
+    ".KKKKKKKKKKKKKKKKKKKKKK.",
+    "........................"
+  ],
+  // Level 5 怪物：遠古紅龍 (24x24)
+  monster_5: [
+    "........KK......KK......",
+    ".......KYYK....KYYK.....",
+    ".......KRRKKKKKKRRK.....",
+    "KK....KRRRRRRRRRRRRK..KK",
+    "KRRK.KRRRRKYYKKYYKRRKKRK",
+    "KRRRKRRRRRKYYKKYYKRRKRRK",
+    "KRRRRKRRRRRRRRRRRRRRKRRK",
+    "KRRRRRKRRRWWWWWWWRRRKRRK",
+    ".KRRRRKRRRRRRRRRRRRKRRRK",
+    ".KRRRRRKRRRYYYYYRRKRRRRK",
+    "..KRRRRRKRYYYYYYYRKKRRK.",
+    "...KKKKKKRYYYYYYYRKRRK..",
+    "........KRRYYYYYRRK.....",
+    ".......KRRRYYYYYRRRK....",
+    ".......KRRRYYYYYRRRK....",
+    "......KRRRRYYYYYRRRRK...",
+    ".....KRRRRRRKKKKRRRRRK..",
+    "....KRRRRRRK....KRRRRRK.",
+    "..KYYYYKKK........KKKYYK",
+    "..KKKKK..............KKK",
+    "........................",
+    "........................",
+    ".KKKKKKKKKKKKKKKKKKKKKK.",
+    "........................"
+  ]
+};
+
+/**
+ * 將 24x24 點陣字元矩陣轉換為銳利去背 SVG（自動合併同色相鄰水平像素，並分離地面陰影與動態身體）
+ */
+function buildPixelSpriteSVG(matrixKey, mirrorX = false) {
+  const rows = SPRITE_MATRICES[matrixKey];
+  if (!rows) return '';
+
+  let bodyRects = '';
+  let shadowRects = '';
+
+  for (let y = 0; y < 24; y++) {
+    const row = rows[y];
+    const isShadowRow = y >= 22; // 第 22-23 列為地面投影，保持靜止不動
+    let x = 0;
+    while (x < 24) {
+      const ch = row[x];
+      const color = PIXEL_PALETTE[ch];
+      if (!color) {
+        x++;
+        continue;
+      }
+      let run = 1;
+      while (x + run < 24 && row[x + run] === ch) {
+        run++;
+      }
+      const rectTag = `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${color}"/>`;
+      if (isShadowRow) shadowRects += rectTag;
+      else bodyRects += rectTag;
+      x += run;
+    }
+  }
+
+  const flipAttr = mirrorX ? ` transform="translate(24,0) scale(-1,1)"` : '';
+  return `<svg class="w-full h-full overflow-visible" viewBox="0 0 24 24" shape-rendering="crispEdges">
+    <g${flipAttr}>
+      <g>${shadowRects}</g>
+      <g class="sprite-body-anim">${bodyRects}</g>
+    </g>
+  </svg>`;
+}
+
+const heroSVGs = [
+  buildPixelSpriteSVG('hero_0', false),
+  buildPixelSpriteSVG('hero_1', false),
+  buildPixelSpriteSVG('hero_2', false),
+  buildPixelSpriteSVG('hero_3', false)
+];
+
+/* ================= Web Audio API 8-bit 音效生成器 ================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type, pitchStep = 0) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+
+  if (type === 'hit') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+    osc.start(now); osc.stop(now + 0.15);
+  } else if (type === 'correct') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.setValueAtTime(659.25, now + 0.08);
+    osc.frequency.setValueAtTime(783.99, now + 0.16);
+    gain.gain.setValueAtTime(0.22, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.28);
+    osc.start(now); osc.stop(now + 0.28);
+  } else if (type === 'encourage') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(329.63, now);
+    osc.frequency.setValueAtTime(261.63, now + 0.12);
+    gain.gain.setValueAtTime(0.22, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.28);
+    osc.start(now); osc.stop(now + 0.28);
+  } else if (type === 'levelup') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.setValueAtTime(554.37, now + 0.08);
+    osc.frequency.setValueAtTime(659.25, now + 0.16);
+    osc.frequency.setValueAtTime(880, now + 0.24);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.4);
+    osc.start(now); osc.stop(now + 0.4);
+  } else if (type === 'chest') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.22);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+    osc.start(now); osc.stop(now + 0.25);
+  } else if (type === 'tick_add') {
+    const f = 440 + Math.min(pitchStep, 24) * 16;
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(f, now);
+    osc.frequency.exponentialRampToValueAtTime(f * 1.25, now + 0.08);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.09);
+    osc.start(now); osc.stop(now + 0.09);
+  } else if (type === 'tick_remove') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(340, now);
+    osc.frequency.exponentialRampToValueAtTime(240, now + 0.08);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.09);
+    osc.start(now); osc.stop(now + 0.09);
+  } else if (type === 'tighten') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(680, now + 0.35);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.36);
+    osc.start(now); osc.stop(now + 0.36);
+  }
+}
+
+/* ================= 遊戲核心狀態與 5 關怪物配置 ================= */
+const gameState = {
+  className: '',
+  playerName: '',
+  selectedHeroIndex: 0,
+  level: 1,
+  hearts: 5,
+  str: 10,
+  streak: 0,
+  totalErrors: 0,
+  errorLogs: [],
+  startTime: null,
+  questionStartTime: null,
+  currentQuestion: null,
+  monsterHp: 40,
+  monsterMaxHp: 40
+};
+
+const monsterConfigs = {
+  1: {
+    name: '史萊姆王',
+    tierDesc: '正方形/長方形・全標尺寸',
+    maxHp: 40,
+    svg: buildPixelSpriteSVG('monster_1', false)
+  },
+  2: {
+    name: '森林哥布林',
+    tierDesc: '正方形/長方形・對邊只標一個尺寸',
+    maxHp: 70,
+    svg: buildPixelSpriteSVG('monster_2', false)
+  },
+  3: {
+    name: '骷髏騎士',
+    tierDesc: 'L形/階梯形・全標尺寸',
+    maxHp: 110,
+    svg: buildPixelSpriteSVG('monster_3', false)
+  },
+  4: {
+    name: '岩石巨人',
+    tierDesc: 'T形/U形/十字形・全標尺寸',
+    maxHp: 160,
+    svg: buildPixelSpriteSVG('monster_4', false)
+  },
+  5: {
+    name: '遠古紅龍',
+    tierDesc: '直線不規則圖形・部分對邊省略尺寸',
+    maxHp: 220,
+    svg: buildPixelSpriteSVG('monster_5', false)
+  }
+};
+
+/* ================= 5個難度層級的直線平面圖形題目生成器 =================
+   所有頂點皆按順時針方向排列，所有邊長皆為 1~10 cm 整數，無曲線斜線！
+======================================================================== */
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generatePerimeterQuestion(level) {
+  let shapeName = '';
+  let shapeCategory = '';
+  let path = [];
+  let visibleEdges = [];
+  let scaffoldTip = '';
+
+  if (level === 1) {
+    // LEVEL 1: 正方形 / 長方形 — 所有邊皆標有尺寸
+    const isSquare = Math.random() < 0.4;
+    if (isSquare) {
+      const s = randInt(2, 7);
+      shapeName = '正方形';
+      shapeCategory = 'square';
+      path = [{x:0,y:0}, {x:s,y:0}, {x:s,y:s}, {x:0,y:s}];
+      visibleEdges = [true, true, true, true];
+      scaffoldTip = `正方形有 4 條一樣長的邊，每條邊都是 ${s} cm：<br>${s} + ${s} + ${s} + ${s} = ${s * 4} cm`;
+    } else {
+      const w = randInt(4, 10);
+      let h = randInt(2, 6);
+      if (h === w) h = w - 1;
+      shapeName = '長方形';
+      shapeCategory = 'rect';
+      path = [{x:0,y:0}, {x:w,y:0}, {x:w,y:h}, {x:0,y:h}];
+      visibleEdges = [true, true, true, true];
+      scaffoldTip = `把長方形的四條邊加起來：<br>${w} + ${h} + ${w} + ${h} = ${(w + h) * 2} cm`;
+    }
+  } else if (level === 2) {
+    // LEVEL 2: 正方形 / 長方形 — 一對邊只標示一個尺寸（利用對邊相等）
+    const isSquare = Math.random() < 0.35;
+    if (isSquare) {
+      const s = randInt(3, 8);
+      shapeName = '正方形';
+      shapeCategory = 'square';
+      path = [{x:0,y:0}, {x:s,y:0}, {x:s,y:s}, {x:0,y:s}];
+      const showIdx = randInt(0, 1);
+      visibleEdges = [showIdx === 0, showIdx === 1, false, false];
+      scaffoldTip = `正方形的 4 條邊長度全部相等！已知一條邊是 ${s} cm，所以四條邊都是 ${s} cm：<br>${s} × 4 = ${s * 4} cm`;
+    } else {
+      const w = randInt(4, 10);
+      let h = randInt(2, 7);
+      if (h === w) h = w - 1;
+      shapeName = '長方形';
+      shapeCategory = 'rect';
+      path = [{x:0,y:0}, {x:w,y:0}, {x:w,y:h}, {x:0,y:h}];
+      const topOrBottom = Math.random() < 0.5;
+      const rightOrLeft = Math.random() < 0.5;
+      visibleEdges = [topOrBottom, rightOrLeft, !topOrBottom, !rightOrLeft];
+      scaffoldTip = `長方形「對邊相等」！<br>兩條長都是 ${w} cm，兩條闊都是 ${h} cm：<br>${w} + ${h} + ${w} + ${h} = ${(w + h) * 2} cm`;
+    }
+  } else if (level === 3) {
+    // LEVEL 3: 基礎直線不規則圖形（L 形、階梯形）— 所有邊皆標有尺寸
+    const subType = randInt(1, 3);
+    if (subType === 1) {
+      const W = randInt(5, 9);
+      const H = randInt(5, 7);
+      const cw = randInt(2, W - 2);
+      const ch = randInt(2, H - 2);
+      shapeName = 'L 形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:0, y:0}, {x:W-cw, y:0}, {x:W-cw, y:ch},
+        {x:W, y:ch}, {x:W, y:H}, {x:0, y:H}
+      ];
+    } else if (subType === 2) {
+      const W = randInt(5, 9);
+      const H = randInt(5, 7);
+      const cw = randInt(2, W - 2);
+      const ch = randInt(2, H - 2);
+      shapeName = '倒 L 形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:0, y:0}, {x:W, y:0}, {x:W, y:H-ch},
+        {x:W-cw, y:H-ch}, {x:W-cw, y:H}, {x:0, y:H}
+      ];
+    } else {
+      const s1 = randInt(2, 3), s2 = randInt(2, 3), s3 = randInt(2, 3);
+      const h1 = randInt(2, 3), h2 = 2, h3 = 2;
+      shapeName = '階梯形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:0, y:0}, {x:s1, y:0}, {x:s1, y:h1},
+        {x:s1+s2, y:h1}, {x:s1+s2, y:h1+h2},
+        {x:s1+s2+s3, y:h1+h2}, {x:s1+s2+s3, y:h1+h2+h3},
+        {x:0, y:h1+h2+h3}
+      ];
+    }
+    visibleEdges = path.map(() => true);
+    scaffoldTip = `這個圖形共有 ${path.length} 條直邊，請順時針把外圍每一條邊的長度相加（別漏掉內凹轉角的短邊喔！）。`;
+  } else if (level === 4) {
+    // LEVEL 4: 進階直線不規則圖形（T 形、凹/U 形、凸字形、十字形）— 所有邊皆標有尺寸
+    const subType = randInt(1, 4);
+    if (subType === 1) {
+      const arm = randInt(2, 3);
+      const stemW = randInt(2, 4);
+      const topH = randInt(2, 3);
+      const stemH = randInt(2, 4);
+      const W = arm * 2 + stemW;
+      shapeName = 'T 字形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:0, y:0}, {x:W, y:0}, {x:W, y:topH},
+        {x:arm+stemW, y:topH}, {x:arm+stemW, y:topH+stemH},
+        {x:arm, y:topH+stemH}, {x:arm, y:topH}, {x:0, y:topH}
+      ];
+    } else if (subType === 2) {
+      const pillar = randInt(2, 3);
+      const gapW = randInt(2, 4);
+      const gapH = randInt(2, 3);
+      const baseH = randInt(2, 3);
+      const W = pillar * 2 + gapW;
+      const H = gapH + baseH;
+      shapeName = '凹字形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:0, y:0}, {x:pillar, y:0}, {x:pillar, y:gapH},
+        {x:pillar+gapW, y:gapH}, {x:pillar+gapW, y:0},
+        {x:W, y:0}, {x:W, y:H}, {x:0, y:H}
+      ];
+    } else if (subType === 3) {
+      const sideW = randInt(2, 3);
+      const topW = randInt(2, 4);
+      const topH = randInt(2, 3);
+      const botH = randInt(2, 3);
+      const W = sideW * 2 + topW;
+      const H = topH + botH;
+      shapeName = '凸字形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:sideW, y:0}, {x:sideW+topW, y:0}, {x:sideW+topW, y:topH},
+        {x:W, y:topH}, {x:W, y:H}, {x:0, y:H},
+        {x:0, y:topH}, {x:sideW, y:topH}
+      ];
+    } else {
+      const arm = randInt(1, 2);
+      const core = randInt(2, 3);
+      const W = arm * 2 + core;
+      shapeName = '十字形多邊形';
+      shapeCategory = 'irregular_all';
+      path = [
+        {x:arm, y:0}, {x:arm+core, y:0}, {x:arm+core, y:arm},
+        {x:W, y:arm}, {x:W, y:arm+core}, {x:arm+core, y:arm+core},
+        {x:arm+core, y:W}, {x:arm, y:W}, {x:arm, y:arm+core},
+        {x:0, y:arm+core}, {x:0, y:arm}, {x:arm, y:arm}
+      ];
+    }
+    visibleEdges = path.map(() => true);
+    scaffoldTip = `外圍共有 ${path.length} 條邊！建議從最上方開始，按順時針方向逐條加起來，或開啟「🏁 方格紙」逐格點擊確認。`;
+  } else {
+    // LEVEL 5: 挑戰直線不規則圖形 — 部分對邊省略尺寸（平移法）
+    const subType = randInt(1, 3);
+    if (subType === 1) {
+      const W = randInt(6, 10);
+      const H = randInt(5, 7);
+      const cw = randInt(2, W - 3);
+      const ch = randInt(2, H - 2);
+      shapeName = 'L 形（缺邊推理）';
+      shapeCategory = 'irregular_partial';
+      path = [
+        {x:0, y:0}, {x:W-cw, y:0}, {x:W-cw, y:ch},
+        {x:W, y:ch}, {x:W, y:H}, {x:0, y:H}
+      ];
+      visibleEdges = [true, true, true, false, true, true];
+      scaffoldTip = `觀察對邊關係：底部總長 ${W} cm，減去上方 ${W - cw} cm，就知道缺標示的橫邊是 ${cw} cm！（或用平移法：周界剛好等於 ${W}×2 + ${H}×2 = ${(W + H) * 2} cm）`;
+    } else if (subType === 2) {
+      const sideW = randInt(2, 3);
+      const topW = randInt(2, 4);
+      const topH = randInt(2, 3);
+      const botH = randInt(2, 3);
+      const W = sideW * 2 + topW;
+      const H = topH + botH;
+      shapeName = '凸字形（缺邊推理）';
+      shapeCategory = 'irregular_partial';
+      path = [
+        {x:sideW, y:0}, {x:sideW+topW, y:0}, {x:sideW+topW, y:topH},
+        {x:W, y:topH}, {x:W, y:H}, {x:0, y:H},
+        {x:0, y:topH}, {x:sideW, y:topH}
+      ];
+      visibleEdges = [true, true, true, false, true, true, true, false];
+      scaffoldTip = `上方三條橫邊加起來等於底部總長 ${W} cm！而垂直方向左右兩邊各高 ${H} cm，所以周界 = ${W}×2 + ${H}×2 = ${(W + H) * 2} cm。`;
+    } else {
+      const pillar = randInt(2, 3);
+      const gapW = randInt(2, 4);
+      const gapH = randInt(2, 3);
+      const baseH = randInt(2, 3);
+      const W = pillar * 2 + gapW;
+      const H = gapH + baseH;
+      shapeName = '凹字形（缺邊推理）';
+      shapeCategory = 'irregular_partial';
+      path = [
+        {x:0, y:0}, {x:pillar, y:0}, {x:pillar, y:gapH},
+        {x:pillar+gapW, y:gapH}, {x:pillar+gapW, y:0},
+        {x:W, y:0}, {x:W, y:H}, {x:0, y:H}
+      ];
+      visibleEdges = [true, true, true, false, true, true, true, true];
+      scaffoldTip = `凹槽左右兩條垂直內壁長度相等，都是 ${gapH} cm！把外框與兩條 ${gapH} cm 內壁加起來即可。`;
+    }
+  }
+
+  const edgeLengths = [];
+  let perimeter = 0;
+  for (let i = 0; i < path.length; i++) {
+    const p1 = path[i];
+    const p2 = path[(i + 1) % path.length];
+    const len = Math.round(Math.abs(p2.x - p1.x) + Math.abs(p2.y - p1.y));
+    edgeLengths.push(len);
+    perimeter += len;
+  }
+
+  return {
+    level,
+    shapeName,
+    shapeCategory,
+    path,
+    edgeLengths,
+    visibleEdges,
+    perimeter,
+    scaffoldTip
+  };
+}
+
+/* ================= 畫布、方格對齊、軟尺與繩段輔助工具 ================= */
+const mainCanvas = document.getElementById('mainCanvas');
+const mainCtx = mainCanvas.getContext('2d');
+
+let activeTool = null; // null | 'grid' | 'ruler' | 'string'
+let gridSize = 36;
+let originX = 72;
+let originY = 72;
+
+// 1. 方格紙工具狀態
+let gridSegments = [];
+let isGridSwiping = false;
+let hoverSegmentId = -1;
+let floatingPlusOnes = [];
+
+// 2. 軟尺工具狀態（圈選收緊）
+let isLassoing = false;
+let lassoPoints = [];
+let rulerTightenState = 'idle';
+let animStartLoop = [];
+let animTargetHull = [];
+let animProgress = 0;
+let rulerFailedConcave = false;
+
+// 3. 繩段工具狀態（自動磁吸貼邊）
+let isStringTracing = false;
+let densePerimeter = [];
+let stringStartIdx = -1;
+let stringCurrentIdx = -1;
+let stringUnwrapped = 0;
+let stringMinProg = 0;
+let stringMaxProg = 0;
+let stringComplete = false;
+let pointerSnapPos = null;
+
+function resizeAndLayoutCanvas() {
+  const parent = mainCanvas.parentElement;
+  if (!parent) return;
+  const cw = parent.clientWidth;
+  const ch = parent.clientHeight;
+  if (cw === 0 || ch === 0) return;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  mainCanvas.width = Math.floor(cw * dpr);
+  mainCanvas.height = Math.floor(ch * dpr);
+  mainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  if (gameState.currentQuestion) {
+    computeShapeScreenLayout(cw, ch);
+    rebuildToolGeometry(true);
+  }
+  renderMainCanvas();
+}
+window.addEventListener('resize', resizeAndLayoutCanvas);
+
+function computeShapeScreenLayout(cw, ch) {
+  const q = gameState.currentQuestion;
+  const xs = q.path.map(p => p.x);
+  const ys = q.path.map(p => p.y);
+  const wCm = Math.max(...xs) - Math.min(...xs);
+  const hCm = Math.max(...ys) - Math.min(...ys);
+
+  const marginX = Math.max(68, cw * 0.16);
+  const marginY = Math.max(46, ch * 0.16);
+  const rawCell = Math.floor(Math.min((cw - marginX * 2) / wCm, (ch - marginY * 2) / hCm));
+  gridSize = Math.max(22, Math.min(46, rawCell));
+
+  const shapePxW = wCm * gridSize;
+  const shapePxH = hCm * gridSize;
+
+  originX = Math.max(gridSize, Math.round(((cw - shapePxW) / 2) / gridSize) * gridSize);
+  originY = Math.max(gridSize, Math.round(((ch - shapePxH) / 2) / gridSize) * gridSize);
+}
+
+function getScreenPolygonPoints() {
+  const q = gameState.currentQuestion;
+  return q.path.map(p => ({
+    x: originX + p.x * gridSize,
+    y: originY + p.y * gridSize
+  }));
+}
+
+function rebuildToolGeometry(preserveGridSelection = false) {
+  const q = gameState.currentQuestion;
+  if (!q) return;
+  const prevSel = preserveGridSelection ? gridSegments.map(s => s.selected) : [];
+
+  gridSegments = [];
+  let segIdx = 0;
+  for (let i = 0; i < q.path.length; i++) {
+    const p1 = q.path[i];
+    const p2 = q.path[(i + 1) % q.path.length];
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const steps = Math.round(Math.abs(dx) + Math.abs(dy));
+    const sx = dx / steps;
+    const sy = dy / steps;
+
+    for (let u = 0; u < steps; u++) {
+      gridSegments.push({
+        id: segIdx,
+        x1: originX + (p1.x + sx * u) * gridSize,
+        y1: originY + (p1.y + sy * u) * gridSize,
+        x2: originX + (p1.x + sx * (u + 1)) * gridSize,
+        y2: originY + (p1.y + sy * (u + 1)) * gridSize,
+        selected: prevSel[segIdx] || false,
+        order: 0
+      });
+      segIdx++;
+    }
+  }
+  renumberSelectedSegments();
+
+  const pts = getScreenPolygonPoints();
+  densePerimeter = [];
+  const stepPx = 4;
+  for (let i = 0; i < pts.length; i++) {
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % pts.length];
+    const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const n = Math.max(1, Math.round(len / stepPx));
+    for (let s = 0; s < n; s++) {
+      const t = s / n;
+      densePerimeter.push({
+        x: p1.x + (p2.x - p1.x) * t,
+        y: p1.y + (p2.y - p1.y) * t
+      });
+    }
+  }
+}
+
+function renumberSelectedSegments() {
+  let num = 1;
+  gridSegments.forEach(s => { s.order = s.selected ? num++ : 0; });
+}
+
+/* ================= 工具切換與重置 ================= */
+function toggleTool(tool) {
+  initAudio();
+  if (activeTool === tool) {
+    activeTool = null;
+  } else {
+    activeTool = tool;
+  }
+
+  document.querySelectorAll('.tool-toggle').forEach(btn => btn.classList.remove('active'));
+  if (activeTool) {
+    document.getElementById(`tool-${activeTool}`).classList.add('active');
+  }
+
+  resetToolOverlay();
+}
+
+function resetToolOverlay() {
+  gridSegments.forEach(s => { s.selected = false; s.order = 0; });
+  isGridSwiping = false;
+  hoverSegmentId = -1;
+  floatingPlusOnes = [];
+
+  isLassoing = false;
+  lassoPoints = [];
+  rulerTightenState = 'idle';
+  rulerFailedConcave = false;
+  animProgress = 0;
+
+  isStringTracing = false;
+  stringStartIdx = -1;
+  stringCurrentIdx = -1;
+  stringUnwrapped = 0;
+  stringMinProg = 0;
+  stringMaxProg = 0;
+  stringComplete = false;
+  pointerSnapPos = null;
+
+  updateToolUIBars();
+  renderMainCanvas();
+}
+
+function updateToolUIBars() {
+  const promptEl = document.getElementById('stage-prompt-text');
+  const resetBtn = document.getElementById('btn-reset-tool');
+  const idleHint = document.getElementById('tool-idle-hint');
+  const gridPanel = document.getElementById('grid-count-panel');
+  const unfoldBanner = document.getElementById('unfold-banner');
+
+  resetBtn.classList.add('hidden');
+  unfoldBanner.classList.add('hidden');
+  gridPanel.classList.add('hidden');
+  gridPanel.classList.remove('flex');
+  idleHint.classList.remove('hidden');
+
+  if (!activeTool) {
+    promptEl.innerText = '請根據標示的尺寸計算周界（單位：cm）';
+    idleHint.innerText = '點選工具可開啟方格背景、軟尺或繩段';
+  } else if (activeTool === 'grid') {
+    promptEl.innerText = '🏁 方格紙已開啟（1格 = 1cm）：點擊圖形邊緣可逐格高亮數數！';
+    idleHint.classList.add('hidden');
+    gridPanel.classList.remove('hidden');
+    gridPanel.classList.add('flex');
+    const count = gridSegments.filter(s => s.selected).length;
+    document.getElementById('grid-count-val').innerText = `${count} cm`;
+    if (count > 0) resetBtn.classList.remove('hidden');
+  } else if (activeTool === 'ruler') {
+    promptEl.innerText = '📏 軟尺已開啟：在圖形外圍「畫一個大圈」包圍圖形，放手後收緊！';
+    idleHint.innerText = '在圖形外圍畫圈包圍（無法貼合內凹位）';
+    if (rulerTightenState !== 'idle') resetBtn.classList.remove('hidden');
+  } else if (activeTool === 'string') {
+    promptEl.innerText = '🧶 繩段已開啟：沿圖形邊界描繪一圈，繩段會自動磁吸貼邊！';
+    idleHint.innerText = '沿圖形邊緣畫一圈，完成後自動拉直測量';
+    if (stringStartIdx >= 0) resetBtn.classList.remove('hidden');
+  }
+}
+
+/* ================= 畫布主渲染引擎 ================= */
+function renderMainCanvas() {
+  const parent = mainCanvas.parentElement;
+  if (!parent || !gameState.currentQuestion) return;
+  const W = parent.clientWidth;
+  const H = parent.clientHeight;
+  mainCtx.clearRect(0, 0, W, H);
+
+  const q = gameState.currentQuestion;
+  const polyPts = getScreenPolygonPoints();
+
+  // 1. 方格背景
+  if (activeTool === 'grid') {
+    mainCtx.save();
+    mainCtx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+    mainCtx.lineWidth = 1;
+    for (let x = 0; x <= W; x += gridSize) {
+      mainCtx.beginPath(); mainCtx.moveTo(x, 0); mainCtx.lineTo(x, H); mainCtx.stroke();
+    }
+    for (let y = 0; y <= H; y += gridSize) {
+      mainCtx.beginPath(); mainCtx.moveTo(0, y); mainCtx.lineTo(W, y); mainCtx.stroke();
+    }
+
+    mainCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    mainCtx.fillRect(10, H - 28, 134, 20);
+    mainCtx.fillStyle = '#38bdf8';
+    mainCtx.font = 'bold 12px "Noto Sans TC", sans-serif';
+    mainCtx.fillText('📐 1 格邊長 = 1 cm', 16, H - 14);
+    mainCtx.restore();
+  }
+
+  // 2. 直線平面圖形本體
+  mainCtx.save();
+  mainCtx.fillStyle = 'rgba(56, 189, 248, 0.24)';
+  mainCtx.strokeStyle = '#38bdf8';
+  mainCtx.lineWidth = 4;
+  mainCtx.lineJoin = 'round';
+
+  mainCtx.beginPath();
+  mainCtx.moveTo(polyPts[0].x, polyPts[0].y);
+  for (let i = 1; i < polyPts.length; i++) {
+    mainCtx.lineTo(polyPts[i].x, polyPts[i].y);
+  }
+  mainCtx.closePath();
+  mainCtx.fill();
+  mainCtx.stroke();
+
+  mainCtx.fillStyle = '#fef08a';
+  polyPts.forEach(pt => {
+    mainCtx.beginPath();
+    mainCtx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+    mainCtx.fill();
+  });
+  mainCtx.restore();
+
+  // 3. 輔助工具疊加層
+  if (activeTool === 'grid') {
+    renderGridOverlay();
+  } else if (activeTool === 'ruler') {
+    renderRulerOverlay(polyPts);
+  } else if (activeTool === 'string') {
+    renderStringOverlay();
+  }
+
+  // 4. 尺寸標註（限 cm 為單位）
+  renderDimensionLabels(q, polyPts);
+}
+
+function renderDimensionLabels(q, polyPts) {
+  mainCtx.save();
+  mainCtx.font = 'bold 13px "Noto Sans TC", Arial, sans-serif';
+  mainCtx.textAlign = 'center';
+  mainCtx.textBaseline = 'middle';
+
+  const placedBoxes = [];
+
+  for (let i = 0; i < polyPts.length; i++) {
+    if (!q.visibleEdges[i]) continue;
+
+    const p1 = polyPts[i];
+    const p2 = polyPts[(i + 1) % polyPts.length];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = dy / len;
+    const ny = -dx / len;
+
+    const labelStr = `${q.edgeLengths[i]} cm`;
+    const textW = mainCtx.measureText(labelStr).width;
+    const boxW = textW + 10;
+    const boxH = 20;
+
+    let offsetDist = Math.abs(nx) > 0.5 ? (boxW / 2 + 10) : 17;
+    let lx = mx + nx * offsetDist;
+    let ly = my + ny * offsetDist;
+
+    for (let b of placedBoxes) {
+      if (Math.abs(lx - b.x) < (boxW + b.w) / 2 + 2 && Math.abs(ly - b.y) < (boxH + b.h) / 2 + 2) {
+        offsetDist += 16;
+        lx = mx + nx * offsetDist;
+        ly = my + ny * offsetDist;
+      }
+    }
+    placedBoxes.push({ x: lx, y: ly, w: boxW, h: boxH });
+
+    mainCtx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    mainCtx.strokeStyle = '#fbbf24';
+    mainCtx.lineWidth = 1.5;
+    roundRect(mainCtx, lx - boxW / 2, ly - boxH / 2, boxW, boxH, 5);
+    mainCtx.fill();
+    mainCtx.stroke();
+
+    mainCtx.fillStyle = '#fef08a';
+    mainCtx.fillText(labelStr, lx, ly + 0.5);
+  }
+  mainCtx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function renderGridOverlay() {
+  if (hoverSegmentId >= 0 && gridSegments[hoverSegmentId] && !gridSegments[hoverSegmentId].selected) {
+    const h = gridSegments[hoverSegmentId];
+    mainCtx.save();
+    mainCtx.strokeStyle = 'rgba(16, 185, 129, 0.55)';
+    mainCtx.lineWidth = 10;
+    mainCtx.lineCap = 'round';
+    mainCtx.beginPath();
+    mainCtx.moveTo(h.x1, h.y1);
+    mainCtx.lineTo(h.x2, h.y2);
+    mainCtx.stroke();
+    mainCtx.restore();
+  }
+
+  gridSegments.forEach(seg => {
+    if (seg.selected) {
+      mainCtx.save();
+      mainCtx.shadowColor = '#10b981';
+      mainCtx.shadowBlur = 10;
+      mainCtx.strokeStyle = '#10b981';
+      mainCtx.lineWidth = 8;
+      mainCtx.lineCap = 'round';
+      mainCtx.beginPath();
+      mainCtx.moveTo(seg.x1, seg.y1);
+      mainCtx.lineTo(seg.x2, seg.y2);
+      mainCtx.stroke();
+
+      mainCtx.shadowBlur = 0;
+      mainCtx.strokeStyle = '#a7f3d0';
+      mainCtx.lineWidth = 2.5;
+      mainCtx.stroke();
+      mainCtx.restore();
+    }
+  });
+
+  mainCtx.save();
+  gridSegments.forEach(seg => {
+    mainCtx.fillStyle = seg.selected ? '#059669' : '#0f172a';
+    mainCtx.strokeStyle = seg.selected ? '#ffffff' : '#38bdf8';
+    mainCtx.lineWidth = 1.8;
+    mainCtx.beginPath();
+    mainCtx.arc(seg.x1, seg.y1, 3.5, 0, Math.PI * 2);
+    mainCtx.fill();
+    mainCtx.stroke();
+  });
+  mainCtx.restore();
+
+  gridSegments.forEach(seg => {
+    if (seg.selected && seg.order > 0) {
+      const mx = (seg.x1 + seg.x2) / 2;
+      const my = (seg.y1 + seg.y2) / 2;
+      mainCtx.save();
+      mainCtx.fillStyle = '#065f46';
+      mainCtx.strokeStyle = '#ffffff';
+      mainCtx.lineWidth = 1.5;
+      mainCtx.beginPath();
+      mainCtx.arc(mx, my, 9, 0, Math.PI * 2);
+      mainCtx.fill();
+      mainCtx.stroke();
+
+      mainCtx.fillStyle = '#ffffff';
+      mainCtx.font = 'bold 10px Arial';
+      mainCtx.textAlign = 'center';
+      mainCtx.textBaseline = 'middle';
+      mainCtx.fillText(seg.order, mx, my + 0.5);
+      mainCtx.restore();
+    }
+  });
+
+  floatingPlusOnes.forEach(fp => {
+    mainCtx.save();
+    mainCtx.globalAlpha = fp.alpha;
+    mainCtx.fillStyle = fp.color;
+    mainCtx.font = 'bold 16px "Noto Sans TC", sans-serif';
+    mainCtx.textAlign = 'center';
+    mainCtx.fillText(fp.text, fp.x, fp.y + fp.offsetY);
+    mainCtx.restore();
+  });
+}
+
+function renderRulerOverlay(polyPts) {
+  if (isLassoing && lassoPoints.length > 1) {
+    drawTapeLoop(lassoPoints, false, false);
+  } else if (rulerTightenState === 'animating' || rulerTightenState === 'done') {
+    const ease = 1 - Math.pow(1 - animProgress, 3);
+    const currentLoop = animStartLoop.map((p, idx) => ({
+      x: p.x + (animTargetHull[idx].x - p.x) * ease,
+      y: p.y + (animTargetHull[idx].y - p.y) * ease
+    }));
+
+    if (rulerTightenState === 'done' && rulerFailedConcave) {
+      mainCtx.save();
+      mainCtx.fillStyle = 'rgba(244, 63, 94, 0.32)';
+      mainCtx.beginPath();
+      mainCtx.moveTo(animTargetHull[0].x, animTargetHull[0].y);
+      for (let i = 1; i < animTargetHull.length; i++) {
+        mainCtx.lineTo(animTargetHull[i].x, animTargetHull[i].y);
+      }
+      mainCtx.closePath();
+      mainCtx.moveTo(polyPts[0].x, polyPts[0].y);
+      for (let i = 1; i < polyPts.length; i++) {
+        mainCtx.lineTo(polyPts[i].x, polyPts[i].y);
+      }
+      mainCtx.closePath();
+      mainCtx.fill('evenodd');
+      mainCtx.restore();
+    }
+
+    drawTapeLoop(currentLoop, true, rulerTightenState === 'done' && rulerFailedConcave);
+  }
+}
+
+function drawTapeLoop(pts, closed, isError) {
+  if (pts.length < 2) return;
+  mainCtx.save();
+  mainCtx.strokeStyle = isError ? '#f43f5e' : '#eab308';
+  mainCtx.lineWidth = 9;
+  mainCtx.lineCap = 'round';
+  mainCtx.lineJoin = 'round';
+
+  mainCtx.beginPath();
+  mainCtx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    mainCtx.lineTo(pts[i].x, pts[i].y);
+  }
+  if (closed) mainCtx.closePath();
+  mainCtx.stroke();
+
+  mainCtx.strokeStyle = isError ? '#ffe4e6' : '#fef08a';
+  mainCtx.lineWidth = 4;
+  mainCtx.stroke();
+
+  mainCtx.strokeStyle = isError ? '#9f1239' : '#854d0e';
+  mainCtx.lineWidth = 2;
+  mainCtx.setLineDash([2, 8]);
+  mainCtx.stroke();
+  mainCtx.restore();
+}
+
+function renderStringOverlay() {
+  if (densePerimeter.length === 0) return;
+  const M = densePerimeter.length;
+
+  if (stringStartIdx >= 0) {
+    const sp = densePerimeter[stringStartIdx];
+    mainCtx.save();
+    mainCtx.fillStyle = '#10b981';
+    mainCtx.strokeStyle = '#ffffff';
+    mainCtx.lineWidth = 2.5;
+    mainCtx.beginPath();
+    mainCtx.arc(sp.x, sp.y, 7, 0, Math.PI * 2);
+    mainCtx.fill();
+    mainCtx.stroke();
+    mainCtx.restore();
+  }
+
+  const span = stringMaxProg - stringMinProg;
+  if (span > 0) {
+    mainCtx.save();
+    mainCtx.strokeStyle = '#ef4444';
+    mainCtx.lineWidth = 7;
+    mainCtx.lineCap = 'round';
+    mainCtx.lineJoin = 'round';
+
+    mainCtx.beginPath();
+    const totalSteps = Math.min(M, span);
+    for (let s = 0; s <= totalSteps; s++) {
+      const idx = (((stringStartIdx + stringMinProg + s) % M) + M) % M;
+      const pt = densePerimeter[idx];
+      if (s === 0) mainCtx.moveTo(pt.x, pt.y);
+      else mainCtx.lineTo(pt.x, pt.y);
+    }
+    if (stringComplete) mainCtx.closePath();
+    mainCtx.stroke();
+
+    mainCtx.strokeStyle = '#fecaca';
+    mainCtx.lineWidth = 2;
+    mainCtx.setLineDash([5, 5]);
+    mainCtx.stroke();
+    mainCtx.restore();
+  }
+
+  if (isStringTracing && pointerSnapPos && !stringComplete) {
+    mainCtx.save();
+    mainCtx.strokeStyle = 'rgba(248, 113, 113, 0.55)';
+    mainCtx.lineWidth = 2;
+    mainCtx.setLineDash([3, 3]);
+    mainCtx.beginPath();
+    mainCtx.moveTo(pointerSnapPos.fingerX, pointerSnapPos.fingerY);
+    mainCtx.lineTo(pointerSnapPos.snapX, pointerSnapPos.snapY);
+    mainCtx.stroke();
+
+    mainCtx.setLineDash([]);
+    mainCtx.fillStyle = '#ef4444';
+    mainCtx.beginPath();
+    mainCtx.arc(pointerSnapPos.snapX, pointerSnapPos.snapY, 6, 0, Math.PI * 2);
+    mainCtx.fill();
+    mainCtx.restore();
+  }
+}
+
+/* ================= 畫布指標互動 ================= */
+mainCanvas.addEventListener('pointerdown', (e) => {
+  if (!activeTool || !gameState.currentQuestion) return;
+  initAudio();
+  const rect = mainCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (activeTool === 'grid') {
+    const hitSeg = findNearestGridSegment(x, y, 22);
+    if (hitSeg) {
+      hitSeg.selected = !hitSeg.selected;
+      renumberSelectedSegments();
+      const count = gridSegments.filter(s => s.selected).length;
+      if (hitSeg.selected) {
+        playSound('tick_add', count);
+        spawnFloatingPlusOne((hitSeg.x1 + hitSeg.x2) / 2, (hitSeg.y1 + hitSeg.y2) / 2, true);
+        isGridSwiping = true;
+      } else {
+        playSound('tick_remove');
+        spawnFloatingPlusOne((hitSeg.x1 + hitSeg.x2) / 2, (hitSeg.y1 + hitSeg.y2) / 2, false);
+      }
+      updateToolUIBars();
+      renderMainCanvas();
+    }
+  } else if (activeTool === 'ruler') {
+    if (rulerTightenState === 'animating') return;
+    resetToolOverlay();
+    isLassoing = true;
+    lassoPoints = [{ x, y }];
+    renderMainCanvas();
+  } else if (activeTool === 'string') {
+    if (stringComplete) return;
+    const nearest = findNearestBoundaryPoint(x, y, 0, densePerimeter.length, true);
+    if (nearest && nearest.dist <= 75) {
+      isStringTracing = true;
+      if (stringStartIdx === -1) {
+        stringStartIdx = nearest.index;
+        stringCurrentIdx = nearest.index;
+        stringUnwrapped = 0;
+        stringMinProg = 0;
+        stringMaxProg = 0;
+        playSound('tick_add', 2);
+      } else {
+        const M = densePerimeter.length;
+        const endIdx1 = (((stringStartIdx + stringMinProg) % M) + M) % M;
+        const endIdx2 = (((stringStartIdx + stringMaxProg) % M) + M) % M;
+        const d1 = Math.hypot(x - densePerimeter[endIdx1].x, y - densePerimeter[endIdx1].y);
+        const d2 = Math.hypot(x - densePerimeter[endIdx2].x, y - densePerimeter[endIdx2].y);
+        if (d1 < d2 && d1 <= 75) {
+          stringCurrentIdx = endIdx1;
+          stringUnwrapped = stringMinProg;
+        } else if (d2 <= 75) {
+          stringCurrentIdx = endIdx2;
+          stringUnwrapped = stringMaxProg;
+        } else {
+          stringStartIdx = nearest.index;
+          stringCurrentIdx = nearest.index;
+          stringUnwrapped = 0;
+          stringMinProg = 0;
+          stringMaxProg = 0;
+        }
+      }
+      pointerSnapPos = {
+        fingerX: x, fingerY: y,
+        snapX: densePerimeter[stringCurrentIdx].x,
+        snapY: densePerimeter[stringCurrentIdx].y
+      };
+      updateToolUIBars();
+      renderMainCanvas();
+    }
+  }
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (!activeTool || !gameState.currentQuestion) return;
+  const rect = mainCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (activeTool === 'grid') {
+    const nearSeg = findNearestGridSegment(x, y, 20);
+    const newHoverId = nearSeg ? nearSeg.id : -1;
+    if (newHoverId !== hoverSegmentId) {
+      hoverSegmentId = newHoverId;
+      renderMainCanvas();
+    }
+    if (isGridSwiping && nearSeg && !nearSeg.selected) {
+      nearSeg.selected = true;
+      renumberSelectedSegments();
+      const count = gridSegments.filter(s => s.selected).length;
+      playSound('tick_add', count);
+      spawnFloatingPlusOne((nearSeg.x1 + nearSeg.x2) / 2, (nearSeg.y1 + nearSeg.y2) / 2, true);
+      updateToolUIBars();
+      renderMainCanvas();
+    }
+  } else if (activeTool === 'ruler' && isLassoing) {
+    const last = lassoPoints[lassoPoints.length - 1];
+    if (Math.hypot(x - last.x, y - last.y) > 6) {
+      lassoPoints.push({ x, y });
+      renderMainCanvas();
+    }
+  } else if (activeTool === 'string' && isStringTracing && !stringComplete) {
+    const M = densePerimeter.length;
+    const nearest = findNearestBoundaryPoint(x, y, stringCurrentIdx, 30, false);
+    if (nearest && nearest.dist <= 95) {
+      let delta = nearest.index - stringCurrentIdx;
+      if (delta > M / 2) delta -= M;
+      if (delta < -M / 2) delta += M;
+
+      stringCurrentIdx = nearest.index;
+      stringUnwrapped += delta;
+      if (stringUnwrapped < stringMinProg) stringMinProg = stringUnwrapped;
+      if (stringUnwrapped > stringMaxProg) stringMaxProg = stringUnwrapped;
+
+      pointerSnapPos = {
+        fingerX: x, fingerY: y,
+        snapX: densePerimeter[stringCurrentIdx].x,
+        snapY: densePerimeter[stringCurrentIdx].y
+      };
+
+      if ((stringMaxProg - stringMinProg) >= Math.floor(M * 0.96)) {
+        stringMaxProg = stringMinProg + M;
+        stringComplete = true;
+        isStringTracing = false;
+        pointerSnapPos = null;
+        playSound('correct');
+        showUnfoldedTool('string', gameState.currentQuestion.perimeter);
+      }
+      renderMainCanvas();
+    }
+  }
+});
+
+window.addEventListener('pointerup', () => {
+  if (isGridSwiping) isGridSwiping = false;
+
+  if (activeTool === 'ruler' && isLassoing) {
+    isLassoing = false;
+    finalizeRulerLasso();
+  }
+
+  if (isStringTracing) {
+    isStringTracing = false;
+    pointerSnapPos = null;
+    renderMainCanvas();
+  }
+});
+
+/* --- 幾何輔助函數 --- */
+function distToSegment(px, py, x1, y1, x2, y2) {
+  const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+  if (l2 === 0) return Math.hypot(px - x1, py - y1);
+  let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+}
+
+function findNearestGridSegment(px, py, maxDist) {
+  let best = null, minD = maxDist;
+  for (let seg of gridSegments) {
+    const d = distToSegment(px, py, seg.x1, seg.y1, seg.x2, seg.y2);
+    if (d < minD) { minD = d; best = seg; }
+  }
+  return best;
+}
+
+function findNearestBoundaryPoint(x, y, centerIdx, radius, searchAll) {
+  const M = densePerimeter.length;
+  if (M === 0) return null;
+  let bestIdx = -1, minDist = Infinity;
+  if (searchAll) {
+    for (let i = 0; i < M; i++) {
+      const d = Math.hypot(x - densePerimeter[i].x, y - densePerimeter[i].y);
+      if (d < minDist) { minDist = d; bestIdx = i; }
+    }
+  } else {
+    for (let off = -radius; off <= radius; off++) {
+      const i = (((centerIdx + off) % M) + M) % M;
+      const d = Math.hypot(x - densePerimeter[i].x, y - densePerimeter[i].y);
+      if (d < minDist) { minDist = d; bestIdx = i; }
+    }
+  }
+  return { index: bestIdx, dist: minDist };
+}
+
+function spawnFloatingPlusOne(x, y, isAdd) {
+  const item = {
+    x, y: y - 8,
+    text: isAdd ? '+1 cm' : '-1 cm',
+    color: isAdd ? '#34d399' : '#fb7185',
+    alpha: 1, offsetY: 0
+  };
+  floatingPlusOnes.push(item);
+  const start = performance.now();
+  function anim(now) {
+    const t = Math.min(1, (now - start) / 500);
+    item.offsetY = -20 * t;
+    item.alpha = 1 - t;
+    renderMainCanvas();
+    if (t < 1) requestAnimationFrame(anim);
+    else {
+      floatingPlusOnes = floatingPlusOnes.filter(f => f !== item);
+      renderMainCanvas();
+    }
+  }
+  requestAnimationFrame(anim);
+}
+
+function computeConvexHull(points) {
+  const pts = points.map(p => ({ x: p.x, y: p.y }))
+    .sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+  if (pts.length <= 2) return pts;
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [];
+  for (let p of pts) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for (let i = pts.length - 1; i >= 0; i--) {
+    const p = pts[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  upper.pop(); lower.pop();
+  return lower.concat(upper);
+}
+
+function resampleClosedLoop(points, numSamples, refAngle) {
+  if (points.length < 3) return [];
+  const cumLen = [0];
+  let total = 0;
+  for (let i = 0; i < points.length; i++) {
+    const p1 = points[i], p2 = points[(i + 1) % points.length];
+    total += Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    cumLen.push(total);
+  }
+  if (total === 0) return points;
+  const sampled = [];
+  for (let k = 0; k < numSamples; k++) {
+    const targetDist = (k / numSamples) * total;
+    let seg = 0;
+    while (seg < points.length - 1 && cumLen[seg + 1] < targetDist) seg++;
+    const d0 = cumLen[seg], d1 = cumLen[seg + 1];
+    const t = d1 > d0 ? (targetDist - d0) / (d1 - d0) : 0;
+    const p1 = points[seg], p2 = points[(seg + 1) % points.length];
+    sampled.push({ x: p1.x + (p2.x - p1.x) * t, y: p1.y + (p2.y - p1.y) * t });
+  }
+  const cx = sampled.reduce((s, p) => s + p.x, 0) / numSamples;
+  const cy = sampled.reduce((s, p) => s + p.y, 0) / numSamples;
+  let bestIdx = 0, minDiff = Infinity;
+  for (let i = 0; i < numSamples; i++) {
+    const ang = Math.atan2(sampled[i].y - cy, sampled[i].x - cx);
+    let diff = Math.abs(ang - refAngle);
+    if (diff > Math.PI) diff = 2 * Math.PI - diff;
+    if (diff < minDiff) { minDiff = diff; bestIdx = i; }
+  }
+  return sampled.slice(bestIdx).concat(sampled.slice(0, bestIdx));
+}
+
+function isPointInPolygon(pt, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+    const intersect = ((yi > pt.y) !== (yj > pt.y)) &&
+      (pt.x < (xj - xi) * (pt.y - yi) / ((yj - yi) || 1e-6) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function finalizeRulerLasso() {
+  if (lassoPoints.length < 10) {
+    lassoPoints = [];
+    renderMainCanvas();
+    return;
+  }
+  const polyPts = getScreenPolygonPoints();
+  const cx = polyPts.reduce((s, p) => s + p.x, 0) / polyPts.length;
+  const cy = polyPts.reduce((s, p) => s + p.y, 0) / polyPts.length;
+  const insideCount = polyPts.filter(p => isPointInPolygon(p, lassoPoints)).length;
+
+  if (!isPointInPolygon({ x: cx, y: cy }, lassoPoints) || insideCount < polyPts.length * 0.6) {
+    playSound('encourage');
+    lassoPoints = [];
+    renderMainCanvas();
+    return;
+  }
+
+  const hull = computeConvexHull(polyPts);
+  const refAngle = Math.atan2(hull[0].y - cy, hull[0].x - cx);
+  animStartLoop = resampleClosedLoop(lassoPoints, 120, refAngle);
+  animTargetHull = resampleClosedLoop(hull, 120, refAngle);
+  animProgress = 0;
+  rulerTightenState = 'animating';
+  document.getElementById('btn-reset-tool').classList.remove('hidden');
+  playSound('tighten');
+
+  const startTime = performance.now();
+  function stepAnim(now) {
+    animProgress = Math.min(1, (now - startTime) / 560);
+    renderMainCanvas();
+    if (animProgress < 1) {
+      requestAnimationFrame(stepAnim);
+    } else {
+      rulerTightenState = 'done';
+      const q = gameState.currentQuestion;
+      const isConcave = q.path.length > 4;
+      if (isConcave) {
+        rulerFailedConcave = true;
+        playSound('encourage');
+        showUnfoldWarning('⚠️ 軟尺收緊後直接拉直跨過內凹位（量度偏短），請改用【🧶 繩段】或【🏁 方格紙】！');
+      } else {
+        rulerFailedConcave = false;
+        playSound('correct');
+        showUnfoldedTool('ruler', q.perimeter);
+      }
+      renderMainCanvas();
+    }
+  }
+  requestAnimationFrame(stepAnim);
+}
+
+function showUnfoldWarning(msg) {
+  const banner = document.getElementById('unfold-banner');
+  const warnEl = document.getElementById('unfold-warn-text');
+  const uCanvas = document.getElementById('unfoldCanvas');
+  banner.classList.remove('hidden');
+  uCanvas.classList.add('hidden');
+  warnEl.classList.remove('hidden');
+  warnEl.innerText = msg;
+}
+
+function showUnfoldedTool(type, totalCm) {
+  const banner = document.getElementById('unfold-banner');
+  const warnEl = document.getElementById('unfold-warn-text');
+  const uCanvas = document.getElementById('unfoldCanvas');
+  banner.classList.remove('hidden');
+  warnEl.classList.add('hidden');
+  uCanvas.classList.remove('hidden');
+  document.getElementById('btn-reset-tool').classList.remove('hidden');
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cw = uCanvas.clientWidth || 400;
+  const ch = 38;
+  uCanvas.width = cw * dpr;
+  uCanvas.height = ch * dpr;
+  const ctx = uCanvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+
+  const padL = 18, padR = 22;
+  const barW = cw - padL - padR;
+
+  if (type === 'ruler') {
+    ctx.fillStyle = '#fef08a';
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(padL, 6, barW, 24);
+    ctx.strokeRect(padL, 6, barW, 24);
+
+    const step = barW / totalCm;
+    ctx.fillStyle = '#713f12';
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'center';
+    for (let i = 0; i <= totalCm; i++) {
+      const x = padL + i * step;
+      ctx.beginPath();
+      ctx.moveTo(x, 6);
+      ctx.lineTo(x, i % 2 === 0 ? 15 : 11);
+      ctx.stroke();
+      if (i % 2 === 0 || i === totalCm) {
+        ctx.fillText(i, x, 26);
+      }
+    }
+  } else if (type === 'string') {
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(padL, 26);
+    ctx.lineTo(padL + barW, 26);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#fecaca';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#10b981';
+    ctx.beginPath(); ctx.arc(padL, 26, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath(); ctx.arc(padL + barW, 26, 5, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 13px "Noto Sans TC", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`🧶 拉直繩段總長度 = ${totalCm} cm`, cw / 2, 13);
+  }
+}
+
+/* ================= RPG 遊戲流程控制 ================= */
+function renderHeroSelectionPreviews() {
+  for (let i = 0; i < 4; i++) {
+    const slot = document.getElementById(`hero-preview-${i}`);
+    if (slot) slot.innerHTML = heroSVGs[i];
+  }
+}
+
+function selectHero(index) {
+  gameState.selectedHeroIndex = index;
+  document.querySelectorAll('.hero-card').forEach((card, idx) => {
+    if (idx === index) {
+      card.classList.add('border-amber-400');
+      card.classList.remove('border-transparent');
+    } else {
+      card.classList.remove('border-amber-400');
+      card.classList.add('border-transparent');
+    }
+  });
+  initAudio();
+}
+
+function startGame() {
+  initAudio();
+  const className = document.getElementById('input-class').value.trim();
+  const playerName = document.getElementById('input-name').value.trim();
+
+  if (!className || !playerName) {
+    const inputClass = document.getElementById('input-class');
+    const inputName = document.getElementById('input-name');
+    if (!className) inputClass.classList.add('border-red-500');
+    if (!playerName) inputName.classList.add('border-red-500');
+    setTimeout(() => {
+      inputClass.classList.remove('border-red-500');
+      inputName.classList.remove('border-red-500');
+    }, 1500);
+    return;
+  }
+
+  gameState.className = className;
+  gameState.playerName = playerName;
+  gameState.startTime = new Date();
+
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+
+  document.getElementById('display-player-name').innerText = playerName;
+  document.getElementById('player-sprite').innerHTML = heroSVGs[gameState.selectedHeroIndex];
+
+  loadLevel(1);
+}
+
+function loadLevel(levelNum) {
+  gameState.level = levelNum;
+  const mConfig = monsterConfigs[levelNum];
+  gameState.monsterMaxHp = mConfig.maxHp;
+  gameState.monsterHp = mConfig.maxHp;
+
+  document.getElementById('level-title').innerText = `LEVEL ${levelNum}`;
+  document.getElementById('level-tier-desc').innerText = mConfig.tierDesc;
+  document.getElementById('monster-name-tag').innerText = mConfig.name;
+  document.getElementById('display-monster-name').innerText = mConfig.name;
+  document.getElementById('monster-sprite').innerHTML = mConfig.svg;
+
+  updateUI();
+  nextQuestion();
+}
+
+function updateUI() {
+  const heartsContainer = document.getElementById('hearts-container');
+  heartsContainer.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const heart = document.createElement('span');
+    heart.className = 'text-xs sm:text-base';
+    heart.innerText = i < gameState.hearts ? '❤️' : '🖤';
+    heartsContainer.appendChild(heart);
+  }
+
+  document.getElementById('player-str').innerText = gameState.str;
+  document.getElementById('streak-badge').innerText = `🔥 ${gameState.streak % 3}/3`;
+
+  const hpPct = Math.max(0, (gameState.monsterHp / gameState.monsterMaxHp) * 100);
+  document.getElementById('monster-hp-bar').style.width = `${hpPct}%`;
+  document.getElementById('monster-hp-text').innerText = `${gameState.monsterHp} / ${gameState.monsterMaxHp}`;
+}
+
+function nextQuestion() {
+  gameState.currentQuestion = generatePerimeterQuestion(gameState.level);
+  gameState.questionStartTime = new Date();
+
+  document.getElementById('shape-title-badge').innerText = gameState.currentQuestion.shapeName;
+  const ansInput = document.getElementById('ans-input');
+  ansInput.value = '';
+
+  resetToolOverlay();
+  resizeAndLayoutCanvas();
+}
+
+/* ================= 作答驗證與傷害計算 ================= */
+function checkAnswer() {
+  initAudio();
+  const ansInput = document.getElementById('ans-input');
+  const userVal = parseInt(ansInput.value, 10);
+
+  if (isNaN(userVal)) {
+    ansInput.classList.add('border-red-500');
+    setTimeout(() => ansInput.classList.remove('border-red-500'), 900);
+    return;
+  }
+
+  const q = gameState.currentQuestion;
+  const timeSpent = Math.max(1, (new Date() - gameState.questionStartTime) / 1000);
+
+  if (userVal === q.perimeter) {
+    playSound('correct');
+    gameState.streak++;
+
+    const rawDmg = Math.round(gameState.str / (timeSpent / 10) / (1 + gameState.level * 0.1));
+    const damage = Math.max(1, rawDmg);
+    playAttackAnimation(damage);
+
+    gameState.monsterHp -= damage;
+    if (gameState.monsterHp <= 0) {
+      gameState.monsterHp = 0;
+      updateUI();
+      setTimeout(() => {
+        if (gameState.level < 5) {
+          playSound('levelup');
+          loadLevel(gameState.level + 1);
+        } else {
+          showVictory();
+        }
+      }, 700);
+    } else {
+      updateUI();
+      setTimeout(nextQuestion, 600);
+    }
+
+    if (gameState.streak > 0 && gameState.streak % 3 === 0) {
+      setTimeout(showTreasureChestModal, 750);
+    }
+  } else {
+    playSound('encourage');
+    gameState.streak = 0;
+    gameState.hearts--;
+    gameState.totalErrors++;
+
+    gameState.errorLogs.push({
+      level: gameState.level,
+      shape: q.shapeName,
+      expected: q.perimeter,
+      given: userVal
+    });
+
+    updateUI();
+
+    if (gameState.hearts <= 0) {
+      if (gameState.level > 1) gameState.level--;
+      gameState.hearts = 5;
+      setTimeout(() => {
+        loadLevel(gameState.level);
+        showScaffoldingModal(userVal, q);
+      }, 350);
+    } else {
+      showScaffoldingModal(userVal, q);
+    }
+  }
+}
+
+function playAttackAnimation(dmg) {
+  playSound('hit');
+  const slash = document.getElementById('slash-effect');
+  const dmgText = document.getElementById('damage-text');
+  const monsterSprite = document.getElementById('monster-sprite');
+
+  dmgText.innerText = `-${dmg}`;
+  slash.classList.remove('hidden');
+  dmgText.classList.remove('hidden');
+  monsterSprite.classList.add('shake');
+
+  setTimeout(() => {
+    slash.classList.add('hidden');
+    dmgText.classList.add('hidden');
+    monsterSprite.classList.remove('shake');
+  }, 650);
+}
+
+/* ================= 動態鷹架 Modal ================= */
+function showScaffoldingModal(userVal, q) {
+  const modal = document.getElementById('modal-scaffold');
+  const detail = document.getElementById('scaffold-detail');
+
+  let extraNote = '';
+  if (activeTool === 'ruler' && rulerFailedConcave) {
+    extraNote = `<br><span class="text-rose-300">⚠️ 剛才使用的「軟尺」無法貼合內凹角落，量出來的長度會比實際周界短喔！</span>`;
+  } else if (q.shapeCategory === 'rect' && !q.visibleEdges.every(Boolean) && userVal === q.perimeter / 2) {
+    extraNote = `<br><span class="text-amber-300">你算出的 ${userVal} cm 只是「一條長＋一條闊」（半圈），別忘了長方形有兩條長和兩條闊喔！</span>`;
+  }
+
+  detail.innerHTML = `${q.scaffoldTip}${extraNote}`;
+  modal.classList.remove('hidden');
+}
+
+function closeScaffoldModal() {
+  document.getElementById('modal-scaffold').classList.add('hidden');
+  document.getElementById('ans-input').value = '';
+}
+
+/* ================= 寶箱與獎勵 ================= */
+function showTreasureChestModal() {
+  playSound('chest');
+  document.getElementById('modal-chest').classList.remove('hidden');
+  document.getElementById('chest-icon').classList.remove('hidden');
+  document.getElementById('chest-result').classList.add('hidden');
+}
+
+function openTreasureChest() {
+  playSound('levelup');
+  document.getElementById('chest-icon').classList.add('hidden');
+
+  const rewards = [
+    { name: '心心 (恢復 1 點生命)', apply: () => { gameState.hearts = Math.min(5, gameState.hearts + 1); } },
+    { name: '小刀 (STR +1)', apply: () => { gameState.str += 1; } },
+    { name: '短劍 (STR +3)', apply: () => { gameState.str += 3; } },
+    { name: '大劍 (STR +5)', apply: () => { gameState.str += 5; } },
+    { name: '手槍 (STR +10)', apply: () => { gameState.str += 10; } }
+  ];
+
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+  reward.apply();
+  updateUI();
+
+  document.getElementById('chest-item-name').innerText = `獲得獎勵：${reward.name}`;
+  document.getElementById('chest-result').classList.remove('hidden');
+}
+
+function closeChestModal() {
+  document.getElementById('modal-chest').classList.add('hidden');
+}
+
+/* ================= 通關結算與 Google Form 自動傳送 ================= */
+function showVictory() {
+  playSound('levelup');
+  const endTime = new Date();
+  const totalTime = Math.round((endTime - gameState.startTime) / 1000);
+
+  document.getElementById('summary-name').innerText = gameState.playerName;
+  document.getElementById('summary-class').innerText = gameState.className;
+  document.getElementById('summary-time').innerText = totalTime;
+  document.getElementById('summary-errors').innerText = gameState.totalErrors;
+
+  document.getElementById('modal-victory').classList.remove('hidden');
+
+  sendToGoogleForm({
+    className: gameState.className,
+    playerName: gameState.playerName,
+    totalErrors: gameState.totalErrors,
+    errorLogs: JSON.stringify(gameState.errorLogs),
+    timeElapsed: totalTime
+  });
+}
+
+function sendToGoogleForm(data) {
+  const formUrl = document.getElementById('gform-url').value.trim();
+  if (!formUrl) return;
+
+  const entryName = document.getElementById('gform-entry-name').value.trim();
+  const entryClass = document.getElementById('gform-entry-class').value.trim();
+  const entryErrors = document.getElementById('gform-entry-errors').value.trim();
+  const entryTime = document.getElementById('gform-entry-time').value.trim();
+  const entryLogs = document.getElementById('gform-entry-logs').value.trim();
+
+  const formData = new FormData();
+  if (entryName) formData.append(entryName, data.playerName);
+  if (entryClass) formData.append(entryClass, data.className);
+  if (entryErrors) formData.append(entryErrors, data.totalErrors);
+  if (entryTime) formData.append(entryTime, data.timeElapsed);
+  if (entryLogs) formData.append(entryLogs, data.errorLogs);
+
+  fetch(formUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).catch(e => console.log('Google Form send attempt:', e));
+}
+
+// 初始化登入畫面的 24x24 勇者預覽圖
+renderHeroSelectionPreviews();
+</script>
+</body>
+</html>
