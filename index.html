@@ -50,13 +50,19 @@
     box-shadow: 0 2px 0 #000;
   }
 
-  /* 8-bit 經典 2 幀呼吸微動畫（身體上下起伏 1 格，地面陰影保持不動） */
-  @keyframes spriteBob {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-2.5px); }
+  /* 高精細點陣精靈圖（勇者與怪物通用）渲染設定 */
+  .sheet-sprite {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: contain;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
   }
-  .sprite-body-anim {
-    animation: spriteBob 0.9s steps(2, end) infinite;
+
+  #player-sprite, #monster-sprite {
+    transition: transform 0.16s ease-out;
   }
 
   @keyframes monsterShake {
@@ -70,9 +76,9 @@
   .shake { animation: monsterShake 0.4s ease-in-out; }
 
   @keyframes slashAnim {
-    0% { opacity: 0; transform: scale(0.4) rotate(-45deg); }
-    50% { opacity: 1; transform: scale(1.3) rotate(0deg); }
-    100% { opacity: 0; transform: scale(1.6) rotate(45deg); }
+    0% { opacity: 0; transform: scale(0.4) rotate(-35deg); }
+    50% { opacity: 1; transform: scale(1.25) rotate(0deg); }
+    100% { opacity: 0; transform: scale(1.55) rotate(25deg); }
   }
   .slash { animation: slashAnim 0.35s ease-out forwards; }
 
@@ -82,7 +88,7 @@
   }
   .dmg-float { animation: floatUp 0.75s ease-out forwards; }
 
-  /* 復古 JRPG 舞台底襯，讓 1px 黑框與白羽翼同時清晰呈現 */
+  /* 復古 JRPG 舞台底襯 */
   .rpg-pedestal-bg {
     background: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 68%, #cbd5e1 69%, #94a3b8 100%);
   }
@@ -123,24 +129,24 @@
         </div>
       </div>
 
-      <!-- 24x24 經典黑框點陣角色形象選擇 -->
+      <!-- 勇者職業選擇 -->
       <div class="w-full max-w-2xl text-center space-y-2">
         <h2 class="text-base sm:text-lg font-bold text-slate-200">請選擇你的勇者職業：</h2>
         <div class="grid grid-cols-4 gap-2 sm:gap-3" id="hero-selector">
           <div onclick="selectHero(0)" id="hero-card-0" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-amber-400 flex flex-col items-center transition transform active:scale-95">
-            <div id="hero-preview-0" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <div id="hero-preview-0" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
             <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">熱血騎士</span>
           </div>
           <div onclick="selectHero(1)" id="hero-card-1" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
-            <div id="hero-preview-1" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <div id="hero-preview-1" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
             <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">魔法女傑</span>
           </div>
           <div onclick="selectHero(2)" id="hero-card-2" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
-            <div id="hero-preview-2" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <div id="hero-preview-2" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
             <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">森林遊俠</span>
           </div>
           <div onclick="selectHero(3)" id="hero-card-3" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
-            <div id="hero-preview-3" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-1"></div>
+            <div id="hero-preview-3" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
             <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">星光聖女</span>
           </div>
         </div>
@@ -208,7 +214,7 @@
       <!-- ② 中間主舞台：左側勇者 + 中央【主顯示框（平面圖形與工具）】 + 右側怪物 -->
       <div class="flex-1 min-h-0 flex items-stretch gap-1.5 sm:gap-2">
         
-        <!-- 左側勇者區（復古 JRPG 舞台底襯，凸顯 24x24 黑框點陣角色） -->
+        <!-- 左側勇者區 -->
         <div class="w-20 sm:w-28 rpg-pedestal-bg rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center p-1.5 shrink-0 relative shadow-inner">
           <div id="player-sprite" class="w-16 h-16 sm:w-24 sm:h-24 transition transform"></div>
           <span id="display-player-name" class="mt-1 bg-slate-900/90 border border-slate-700 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-amber-300 truncate max-w-full">
@@ -248,12 +254,12 @@
           </div>
         </div>
 
-        <!-- 右側怪物區（復古 JRPG 舞台底襯，凸顯 24x24 黑框點陣 Boss） -->
+        <!-- 右側怪物區 -->
         <div class="w-20 sm:w-28 rpg-pedestal-bg rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center p-1.5 shrink-0 relative shadow-inner">
-          <!-- 斬擊與傷害飄字特效 -->
-          <div id="slash-effect" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none text-amber-500 z-20">
-            <svg class="w-16 h-16 sm:w-24 sm:h-24 slash" viewBox="0 0 100 100">
-              <path d="M 10 90 L 90 10 L 80 5 L 5 85 Z" fill="currentColor" stroke="#000" stroke-width="4"/>
+          <!-- 職業專屬攻擊特效與傷害飄字 -->
+          <div id="slash-effect" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            <svg id="slash-svg" class="w-16 h-16 sm:w-24 sm:h-24 slash" viewBox="0 0 100 100">
+              <path d="M 10 90 L 90 10 L 80 5 L 5 85 Z" fill="#f59e0b" stroke="#000" stroke-width="4"/>
             </svg>
           </div>
           <div id="damage-text" class="hidden absolute top-2 font-black text-2xl sm:text-4xl text-yellow-300 drop-shadow-[0_3px_0_#000] pixel-font dmg-float z-30 pointer-events-none">
@@ -381,328 +387,481 @@
 
   </div>
 
+<!-- 獨立引入測量工具模組 -->
+<script src="tools.js"></script>
+
 <script>
 /* iOS Safari 手勢放大防止 */
 document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 
-/* ================= 24x24 經典黑框點陣圖渲染引擎 ================= */
-const PIXEL_PALETTE = {
-  '.': null,        // 透明
-  'K': '#090d16',   // 1px 銳利黑框 / 陰影
-  'W': '#ffffff',   // 純白 / 高光
-  'S': '#fed7aa',   // 暖膚色
-  'Y': '#fde047',   // 亮金黃
-  'O': '#ea580c',   // 深橘核心
-  'R': '#ef4444',   // 亮紅
-  'B': '#3b82f6',   // 皇家藍
-  'b': '#1d4ed8',   // 深藍
-  'C': '#22d3ee',   // 亮青藍
-  'G': '#22c55e',   // 翠綠
-  'g': '#15803d',   // 森林深綠
-  'L': '#a3e635',   // 萊姆綠
-  'P': '#c084fc',   // 星光紫
-  'M': '#f472b6',   // 亮粉紅
-  'm': '#db2777',   // 深粉紅
-  'E': '#f1f5f9',   // 銀白 / 骨白
-  'e': '#94a3b8',   // 鋼灰
-  'd': '#475569',   // 暗岩灰
-  'N': '#b45309',   // 暖木棕
-  'n': '#78350f'    // 深木棕
+const GITHUB_RAW_BASE = "https://github.com/chungsir2024-cmd/chungsir2024-cmd.github.io/blob/main/";
+const GITHUB_ALT_BASE = "https://raw.githubusercontent.com/chungsir2024-cmd/chungsir2024-cmd.github.io/main/";
+
+function buildSpriteUrls(filename) {
+  return [
+    `${GITHUB_RAW_BASE}${filename}?raw=true`,
+    `${GITHUB_ALT_BASE}${filename}`
+  ];
+}
+
+/* ================= 勇者精靈圖配置 ================= */
+const HERO_SHEET_CONFIGS = [
+  {
+    id: 0,
+    name: '熱血騎士',
+    fallbackEmoji: '⚔️',
+    urls: buildSpriteUrls('knight.jpeg'),
+    x0: 287,
+    numCols: 9,
+    mirrorX: false,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8], peakFrame: 3, lungeX: 26, frameMs: 58 },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5] },
+      knockdown: { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+    },
+    slashSVG: `<path d="M 10 90 L 90 10 L 80 5 L 5 85 Z" fill="#f59e0b" stroke="#000" stroke-width="4"/><path d="M 22 92 L 92 22 L 86 18 L 16 88 Z" fill="#38bdf8" stroke="#000" stroke-width="3"/>`
+  },
+  {
+    id: 1,
+    name: '魔法女傑',
+    fallbackEmoji: '🔮',
+    urls: buildSpriteUrls('mage.jpeg'),
+    x0: 287,
+    numCols: 9,
+    mirrorX: false,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 7, 8], peakFrame: 5, lungeX: 10, frameMs: 65 },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+    },
+    slashSVG: `<circle cx="52" cy="50" r="28" fill="#f97316" stroke="#000" stroke-width="4"/><circle cx="52" cy="50" r="18" fill="#fde047" stroke="#ea580c" stroke-width="3"/><path d="M 12 32 L 32 45 L 14 54 Z M 10 62 L 30 56 L 16 74 Z" fill="#fb923c" stroke="#000" stroke-width="2.5"/>`
+  },
+  {
+    id: 2,
+    name: '森林遊俠',
+    fallbackEmoji: '🏹',
+    urls: buildSpriteUrls('ranger.jpeg'),
+    x0: 287,
+    numCols: 9,
+    mirrorX: false,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5], peakFrame: 4, lungeX: 8, frameMs: 75 },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+    },
+    slashSVG: `<path d="M 10 50 L 76 50" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/><path d="M 12 50 L 82 50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/><polygon points="94,50 68,35 74,50 68,65" fill="#38bdf8" stroke="#000" stroke-width="3.5"/><path d="M 28 32 Q 52 24 72 36 M 28 68 Q 52 76 72 64" fill="none" stroke="#67e8f9" stroke-width="3" stroke-linecap="round"/>`
+  },
+  {
+    id: 3,
+    name: '星光聖女',
+    fallbackEmoji: '✨',
+    urls: buildSpriteUrls('sister.jpeg'),
+    x0: 278,
+    numCols: 9,
+    mirrorX: false,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5], peakFrame: 3, lungeX: 20, frameMs: 75 },
+      hurt:      { row: 4, cols: [2, 3, 4, 5, 6] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+    },
+    slashSVG: `<path d="M 43 10 H 57 V 40 H 88 V 54 H 57 V 90 H 43 V 54 H 12 V 40 H 43 Z" fill="#fde047" stroke="#000" stroke-width="4"/><path d="M 47 16 H 53 V 44 H 82 V 50 H 53 V 84 H 47 V 50 H 18 V 44 H 47 Z" fill="#38bdf8"/>`
+  }
+];
+
+/* ================= 五關怪物精靈圖與關卡配置 ================= */
+const MONSTER_SHEET_CONFIGS = {
+  1: {
+    name: '史萊姆王',
+    tierDesc: '正方形/長方形・全標尺寸',
+    maxHp: 40,
+    fallbackEmoji: '💧',
+    urls: buildSpriteUrls('slime.jpeg'),
+    x0: 296,
+    numCols: 9,
+    mirrorX: true,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
+    }
+  },
+  2: {
+    name: '森林哥布林',
+    tierDesc: '正方形/長方形・對邊只標一個尺寸',
+    maxHp: 70,
+    fallbackEmoji: '👺',
+    urls: buildSpriteUrls('goblin.jpeg'),
+    x0: 300,
+    numCols: 9,
+    mirrorX: true,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6] }
+    }
+  },
+  3: {
+    name: '骷髏騎士',
+    tierDesc: 'L形/階梯形・全標尺寸',
+    maxHp: 110,
+    fallbackEmoji: '💀',
+    urls: buildSpriteUrls('skeleton.jpeg'),
+    x0: 438,
+    numCols: 8,
+    mirrorX: true,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
+    }
+  },
+  4: {
+    name: '岩石巨人',
+    tierDesc: 'T形/U形/十字形・全標尺寸',
+    maxHp: 160,
+    fallbackEmoji: '🗿',
+    urls: buildSpriteUrls('golem.jpeg'),
+    x0: 352,
+    numCols: 8,
+    mirrorX: true,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
+    }
+  },
+  5: {
+    name: '遠古紅龍',
+    tierDesc: '直線不規則圖形・部分對邊省略尺寸',
+    maxHp: 220,
+    fallbackEmoji: '🐉',
+    urls: buildSpriteUrls('dragon.jpeg'),
+    x0: 352,
+    numCols: 8,
+    mirrorX: true,
+    anims: {
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
+    }
+  }
 };
 
-const SPRITE_MATRICES = {
-  // 0. 熱血騎士 (24x24)：紅羽銀盔、藍甲披風、像素寬劍與盾牌
-  hero_0: [
-    "........KKKKK...........",
-    ".......KRRRRRK..........",
-    "......KRRRRRYYK.........",
-    ".....KRRRRRRKKKK........",
-    "....KRRRRRRKEEEEK.......",
-    "....KRRRRRKEWWWWK.......",
-    "....KKKKKKSSSSSSK.......",
-    ".....KSSSSKSSSSKK.......",
-    ".....KSSSSKSSSSKK.......",
-    ".....KSSSSSSSSSSK.......",
-    "......KKKKKKKKKK....KK..",
-    "....KKBBBBBBBBBBK..KEEK.",
-    "..KKEEKBBBBBBBBBK.KEWEK.",
-    ".KKEBBKBBBBYYYBBK.KEWEK.",
-    ".KKEBBKBBBBBBBBBK.KEWEK.",
-    ".KKEBBKBBBBBBBBBK.KEEK..",
-    ".KKEBBKBBBBBBBBBK.KKKK..",
-    "..KKKK.KBBBBBBBBK.KYYK..",
-    ".......KbbKKKKbbK..KK...",
-    ".......KbbKKKKbbK.......",
-    "......KeeKKKKKKeeK......",
-    "......KKKKKKKKKKKK......",
-    "....KKKKKKKKKKKKKKKK....",
-    "........................"
-  ],
-  // 1. 魔法女傑 (24x24)：金邊青藍尖帽、金色長髮、粉紅法袍與星光法杖
-  hero_1: [
-    ".........KKKKK..........",
-    "........KYYYYYK.........",
-    ".......KYYCCCYYK........",
-    "......KCCCCCCCCCK.......",
-    ".....KCCCCCCCCCCCK......",
-    "...KKKKKKKKKKKKKKKKK....",
-    "..KYYYYCCCCCCCCCYYYYK...",
-    "...KKKKKKKKKKKKKKKKK....",
-    "....KYYSSSSSSSSSYYK.....",
-    "....KYSSKSSSSSKSSYK.....",
-    "....KYSSKSSSSSKSSYK.....",
-    "....KYYSSSSSSSSSYYK..KK.",
-    ".....KKKKKKKKKKKKK..KYYK",
-    "....KMMMMMYYYMMMMMK.KYYK",
-    "...KMMMMMMMYYMMMMMMK.KNK",
-    "...KMMKMMMMMMMMMKMMK.KNK",
-    "...KMMKMMMMMMMMMKMMKKKNK",
-    "...KKKKMMMMMMMMMKKKK.KNK",
-    "......KMMMMMMMMMK....KNK",
-    "......KmmMMMMMmmK....KNK",
-    ".....KmmKKKKKKKmmK...KNK",
-    ".....KKKKKKKKKKKKK...KKK",
-    "...KKKKKKKKKKKKKKKKK....",
-    "........................"
-  ],
-  // 2. 森林遊俠 (24x24)：綠羽獵帽、森林綠短袍與木製長弓
-  hero_2: [
-    ".......KKKKKKK..........",
-    "......KGGGGGGGK..KK.....",
-    ".....KGGGGGGGGGKKYYK....",
-    "....KGGGGGGGGGGGKYYK....",
-    "...KKKKKKKKKKKKKKKK.....",
-    "....KNNSSSSSSSSSK.......",
-    "....KNNSSKSSSSKSSK......",
-    "....KNNSSKSSSSKSSK......",
-    "....KNNSSSSSSSSSSK..KK..",
-    ".....KKKKKKKKKKKK..KNNK.",
-    "....KLLLLLYYLLLLLKKNK.EK",
-    "...KLLLLLLYYLLLLLLNK..EK",
-    "...KLLKLLLLLLLLKLLNK..EK",
-    "...KLLKLLLLLLLLKLLNK..EK",
-    "...KLLKLLLLLLLLKLLNK..EK",
-    "...KKKKLLLLLLLLKKKKNK.EK",
-    "......KggggggggK...KNKEK",
-    "......KggKKKKggK....KNNK",
-    "......KggKKKKggK.....KK.",
-    ".....KNNKKKKKKKKNNK.....",
-    ".....KKKKKKKKKKKKKK.....",
-    "........................",
-    "...KKKKKKKKKKKKKKKK.....",
-    "........................"
-  ],
-  // 3. 星光聖女 (24x24)：金色懸浮光環、紫色長髮、純白天使羽翼與地面投影
-  hero_3: [
-    "......KKKKKKKKK.........",
-    ".....KYYYYYYYYYK........",
-    ".....KYYKKKKKYYK........",
-    "......KKKKKKKKK.........",
-    ".....KPPPPPPPPPK........",
-    "....KPPPPPPPPPPPK.......",
-    "...KPPPSSSSSSSSSPPK.....",
-    "...KPPSSKSSSSSKSSPPK....",
-    "...KPPSSKSSSSSKSSPPK....",
-    "...KPPPSSSSSSSSSPPPK.KK.",
-    ".KK.KKKKKKKKKKKKKK.KKWWK",
-    "KWWKKWWWWWYYYYWWWWWKKWWK",
-    "KWWWKWWWWWYYYYWWWWWKWKWK",
-    "KWWWKWWKWWWWWWWWKWWKWKWK",
-    ".KWWKWWKWWWWWWWWKWWKWWK.",
-    "..KKKKWKWWWWWWWWKWKKKK..",
-    ".....KKKKWWWWWWKKKK.....",
-    ".......KYYYYYYYYK.......",
-    ".......KWWWWWWWWK.......",
-    "........KKKKKKKK........",
-    "........................",
-    "........................",
-    ".....KKKKKKKKKKKKKK.....",
-    ".......KKKKKKKKKK......."
-  ],
-  // Level 1 怪物：史萊姆王 (24x24)
-  monster_1: [
-    "........................",
-    "........KK....KK........",
-    ".......KYYK..KYYK.......",
-    ".......KYYYYYYYYK.......",
-    ".......KKKKKKKKKK.......",
-    "......KGGGGGGGGGGK......",
-    "....KKGGGGGGGGGGGGKK....",
-    "...KGGWWGGGGGGGGGGGGK...",
-    "..KGGWWGGGGGGGGGGGGGGK..",
-    ".KGGGGGGGGGGGGGGGGGGGGK.",
-    ".KGGGGKWKGGGGGGKWKGGGGK.",
-    "KGGGGGKWWKGGGGKWWKGGGGGK",
-    "KGGGGGKWWKGGGGKWWKGGGGGK",
-    "KGGGGGGKKGGGGGGKKGGGGGGK",
-    "KGGGGGGGGGGGGGGGGGGGGGGK",
-    "KggggGGGGKKKKKKGGGGggggK",
-    ".KggggggKRRRRRRKggggggK.",
-    ".KgggggggKKKKKKgggggggK.",
-    "..KggggggggggggggggggK..",
-    "...KKKKKKKKKKKKKKKKKK...",
-    "........................",
-    "........................",
-    "..KKKKKKKKKKKKKKKKKKKK..",
-    "........................"
-  ],
-  // Level 2 怪物：森林哥布林 (24x24)
-  monster_2: [
-    "........................",
-    ".......KKKKKKKKKK.......",
-    ".....KKggggggggggKK.....",
-    ".KKKKggggggggggggggKKKK.",
-    "KggggggggggggggggggggggK",
-    ".KKKKgggKYYKggKYYKgggKK.",
-    "....KgggKYYKggKYYKgggK..",
-    "....KggggggggggggggggK..",
-    ".....KgggKWWWWWWKgggK...",
-    "......KKKKWKKKKWKKKK..KK",
-    ".....KNNNNNNNNNNNNNNKKnK",
-    "....KNNNKNNNNNNNNKNNKKnK",
-    "....KNNNKNNNNNNNNKNNKnKK",
-    "....KNNNKNNNNNNNNKNNKnK.",
-    "....KKKKKNNNNNNNNKKKnnK.",
-    "........KNNNNNNNNK.KNNK.",
-    "........KnnKKKKnnK.KNNK.",
-    "........KnnKKKKnnK..KK..",
-    ".......KgggKKKKgggK.....",
-    ".......KKKKKKKKKKKK.....",
-    "........................",
-    "........................",
-    "...KKKKKKKKKKKKKKKKKK...",
-    "........................"
-  ],
-  // Level 3 怪物：骷髏騎士 (24x24)
-  monster_3: [
-    "......KKKKKKKKKKK.......",
-    ".....KEEEEEEEEEEEK......",
-    "....KEEEEEEEEEEEEEK.....",
-    "....KEEEKKKKEEKKKKEK....",
-    "....KEEEKKKKEEKKKKEK....",
-    "....KEEEEEEEKKKEEEEK....",
-    ".....KEEEEEEEEEEEEK.....",
-    "......KEKWKEKWKEKK......",
-    ".......KKKKKKKKKK....KK.",
-    "....KKKRRRRRRRRRRKK.KEEK",
-    "...KRRRKEEEEEEEEKRK.KEWK",
-    "..KRRRRKEKKKKKKEKRK.KEWK",
-    "..KRRRRKEEEEEEEEKRK.KEWK",
-    "..KRRRRKEKKKKKKEKRK.KEWK",
-    "..KRRRRKEEEEEEEEKRKKKEEK",
-    "..KRRRR.KKKKKKKKKK..KYYK",
-    "...KKK..KeeKKKKeeK...KK.",
-    "........KeeKKKKeeK......",
-    ".......KEEEKKKKKEEEK....",
-    "........KKKKKKKKKKK.....",
-    "........................",
-    "........................",
-    "...KKKKKKKKKKKKKKKKKK...",
-    "........................"
-  ],
-  // Level 4 怪物：岩石巨人 (24x24)
-  monster_4: [
-    ".....KKKKKKKKKKKKK......",
-    "....KeeeeeeeeeeeeeK.....",
-    "...KeeeeeeeeeeeeeeeK....",
-    "..KeeeeKYYKeeeeKYYKeeK..",
-    "..KeeeeKOOKeeeKOOOKeeK..",
-    ".KKKeeeeeeeeeeeeeeeKKK..",
-    "KdddKeeeeeeeeeeeeeKdddK.",
-    "KdddddeeeeeeeeeeeeeddddK",
-    "KdddddeeeeKOOOOOeeeedddK",
-    "KdddddeeeKOOYYYOOeeedddK",
-    "KdddddeeeeKOOOOOeeeedddK",
-    "KdddddeeeeeeeeeeeeeddddK",
-    "KddddKeeeeeeeeeeeeeKddddK",
-    ".KKKK.KeeeeeeeeeeeK.KKKK.",
-    "......KdddddddddddK.....",
-    "......KddddKKKddddK.....",
-    ".....KdddddKKKdddddK....",
-    ".....KdddddKKKdddddK....",
-    "....KddddddKKddddddK....",
-    "....KKKKKKKKKKKKKKKKK...",
-    "........................",
-    "........................",
-    ".KKKKKKKKKKKKKKKKKKKKKK.",
-    "........................"
-  ],
-  // Level 5 怪物：遠古紅龍 (24x24)
-  monster_5: [
-    "........KK......KK......",
-    ".......KYYK....KYYK.....",
-    ".......KRRKKKKKKRRK.....",
-    "KK....KRRRRRRRRRRRRK..KK",
-    "KRRK.KRRRRKYYKKYYKRRKKRK",
-    "KRRRKRRRRRKYYKKYYKRRKRRK",
-    "KRRRRKRRRRRRRRRRRRRRKRRK",
-    "KRRRRRKRRRWWWWWWWRRRKRRK",
-    ".KRRRRKRRRRRRRRRRRRKRRRK",
-    ".KRRRRRKRRRYYYYYRRKRRRRK",
-    "..KRRRRRKRYYYYYYYRKKRRK.",
-    "...KKKKKKRYYYYYYYRKRRK..",
-    "........KRRYYYYYRRK.....",
-    ".......KRRRYYYYYRRRK....",
-    ".......KRRRYYYYYRRRK....",
-    "......KRRRRYYYYYRRRRK...",
-    ".....KRRRRRRKKKKRRRRRK..",
-    "....KRRRRRRK....KRRRRRK.",
-    "..KYYYYKKK........KKKYYK",
-    "..KKKKK..............KKK",
-    "........................",
-    "........................",
-    ".KKKKKKKKKKKKKKKKKKKKKK.",
-    "........................"
-  ]
+const HERO_FRAMES = [
+  { ready: false, idle: [], attack: [], hurt: [], knockdown: [] },
+  { ready: false, idle: [], attack: [], hurt: [], knockdown: [] },
+  { ready: false, idle: [], attack: [], hurt: [], knockdown: [] },
+  { ready: false, idle: [], attack: [], hurt: [], knockdown: [] }
+];
+
+const MONSTER_FRAMES = {
+  1: { ready: false, idle: [], hurt: [], knockdown: [] },
+  2: { ready: false, idle: [], hurt: [], knockdown: [] },
+  3: { ready: false, idle: [], hurt: [], knockdown: [] },
+  4: { ready: false, idle: [], hurt: [], knockdown: [] },
+  5: { ready: false, idle: [], hurt: [], knockdown: [] }
 };
+
+let loginHeroTimers = [null, null, null, null];
+let battleHeroTimer = null;
+let battleStateLock = false;
+let monsterIdleTimer = null;
+let monsterStateLock = false;
 
 /**
- * 將 24x24 點陣字元矩陣轉換為銳利去背 SVG（自動合併同色相鄰水平像素，並分離地面陰影與動態身體）
+ * 透過連通區域演算法去除 JPEG 外部灰白棋盤格底紋，保留角色高光與銀白細節
  */
-function buildPixelSpriteSVG(matrixKey, mirrorX = false) {
-  const rows = SPRITE_MATRICES[matrixKey];
-  if (!rows) return '';
+function removeCheckerboardBackground(sourceImg) {
+  const w = sourceImg.naturalWidth || sourceImg.width;
+  const h = sourceImg.naturalHeight || sourceImg.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(sourceImg, 0, 0);
 
-  let bodyRects = '';
-  let shadowRects = '';
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const data = imgData.data;
+  const total = w * h;
 
-  for (let y = 0; y < 24; y++) {
-    const row = rows[y];
-    const isShadowRow = y >= 22; // 第 22-23 列為地面投影，保持靜止不動
-    let x = 0;
-    while (x < 24) {
-      const ch = row[x];
-      const color = PIXEL_PALETTE[ch];
-      if (!color) {
-        x++;
-        continue;
-      }
-      let run = 1;
-      while (x + run < 24 && row[x + run] === ch) {
-        run++;
-      }
-      const rectTag = `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${color}"/>`;
-      if (isShadowRow) shadowRects += rectTag;
-      else bodyRects += rectTag;
-      x += run;
+  const isGrayCand = new Uint8Array(total);
+  const satArr = new Uint8Array(total);
+  const meanArr = new Uint8Array(total);
+
+  for (let i = 0; i < total; i++) {
+    const idx = i * 4;
+    const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+    const maxC = Math.max(r, g, b);
+    const minC = Math.min(r, g, b);
+    const sat = maxC - minC;
+    const meanV = Math.round((r + g + b) / 3);
+    satArr[i] = sat;
+    meanArr[i] = meanV;
+    if (sat < 26 && meanV > 165) {
+      isGrayCand[i] = 1;
     }
   }
 
-  const flipAttr = mirrorX ? ` transform="translate(24,0) scale(-1,1)"` : '';
-  return `<svg class="w-full h-full overflow-visible" viewBox="0 0 24 24" shape-rendering="crispEdges">
-    <g${flipAttr}>
-      <g>${shadowRects}</g>
-      <g class="sprite-body-anim">${bodyRects}</g>
-    </g>
-  </svg>`;
+  const visited = new Uint8Array(total);
+  const isTrueBg = new Uint8Array(total);
+  const queue = new Int32Array(total);
+  const dx = [-1, 1, 0, 0, -1, 1, -1, 1];
+  const dy = [0, 0, -1, 1, -1, -1, 1, 1];
+
+  for (let start = 0; start < total; start++) {
+    if (!isGrayCand[start] || visited[start]) continue;
+    let head = 0, tail = 0;
+    queue[tail++] = start;
+    visited[start] = 1;
+
+    while (head < tail) {
+      const curr = queue[head++];
+      const cx = curr % w;
+      const cy = (curr - cx) / w;
+      for (let d = 0; d < 8; d++) {
+        const nx = cx + dx[d];
+        const ny = cy + dy[d];
+        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+          const nIdx = ny * w + nx;
+          if (isGrayCand[nIdx] && !visited[nIdx]) {
+            visited[nIdx] = 1;
+            queue[tail++] = nIdx;
+          }
+        }
+      }
+    }
+
+    if (tail > 5000) {
+      for (let k = 0; k < tail; k++) {
+        isTrueBg[queue[k]] = 1;
+      }
+    }
+  }
+
+  for (let i = 0; i < total; i++) {
+    if (isTrueBg[i]) {
+      data[i * 4 + 3] = 0;
+    } else if (satArr[i] < 30 && meanArr[i] > 140) {
+      const x = i % w;
+      const y = (i - x) / w;
+      let bgNeighbors = 0;
+      for (let d = 0; d < 8; d++) {
+        const nx = x + dx[d], ny = y + dy[d];
+        if (nx >= 0 && nx < w && ny >= 0 && ny < h && isTrueBg[ny * w + nx]) {
+          bgNeighbors++;
+        }
+      }
+      if (bgNeighbors >= 2) {
+        data[i * 4 + 3] = 0;
+      } else if (bgNeighbors === 1) {
+        data[i * 4 + 3] = 70;
+      }
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+  return canvas;
 }
 
-const heroSVGs = [
-  buildPixelSpriteSVG('hero_0', false),
-  buildPixelSpriteSVG('hero_1', false),
-  buildPixelSpriteSVG('hero_2', false),
-  buildPixelSpriteSVG('hero_3', false)
-];
+/**
+ * 通用精靈圖切片函數（支援勇者與怪物、不同欄數與水平翻轉）
+ */
+function sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas) {
+  const W = cleanCanvas.width;
+  const H = cleanCanvas.height;
+  const numCols = cfg.numCols || 9;
+  const colW = (W - cfg.x0) / numCols;
+  const rowH = H / 6.0;
+
+  const outW = Math.ceil(colW) + 4;
+  const outH = Math.ceil(rowH) + 4;
+
+  const sliceSpec = (spec) => {
+    if (!spec) return [];
+    const sy = Math.max(0, Math.round(spec.row * rowH));
+    const sh = Math.min(H - sy, Math.round(rowH));
+    const dstY = outH - sh;
+    const frames = [];
+
+    for (const c of spec.cols) {
+      const sx = Math.max(0, Math.round(cfg.x0 + c * colW));
+      const sw = Math.min(W - sx, Math.round(colW));
+      const dstX = Math.floor((outW - sw) / 2);
+
+      const fCanvas = document.createElement('canvas');
+      fCanvas.width = outW;
+      fCanvas.height = outH;
+      const fCtx = fCanvas.getContext('2d');
+      fCtx.imageSmoothingEnabled = false;
+
+      if (cfg.mirrorX) {
+        fCtx.save();
+        fCtx.translate(outW, 0);
+        fCtx.scale(-1, 1);
+        fCtx.drawImage(cleanCanvas, sx, sy, sw, sh, dstX, dstY, sw, sh);
+        fCtx.restore();
+      } else {
+        fCtx.drawImage(cleanCanvas, sx, sy, sw, sh, dstX, dstY, sw, sh);
+      }
+      frames.push(fCanvas.toDataURL('image/png'));
+    }
+    return frames;
+  };
+
+  targetStore.idle = sliceSpec(cfg.anims.idle);
+  if (cfg.anims.attack) targetStore.attack = sliceSpec(cfg.anims.attack);
+  targetStore.hurt = sliceSpec(cfg.anims.hurt);
+  targetStore.knockdown = sliceSpec(cfg.anims.knockdown);
+  targetStore.ready = true;
+}
+
+function loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx = 0) {
+  if (!cfg || urlIdx >= cfg.urls.length) return;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try {
+      const cleanCanvas = removeCheckerboardBackground(img);
+      sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas);
+      if (typeof onReadyCallback === 'function') onReadyCallback();
+    } catch (err) {
+      console.warn(`${cfg.name}精靈圖處理失敗，嘗試備援網址:`, err);
+      loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx + 1);
+    }
+  };
+  img.onerror = () => {
+    loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx + 1);
+  };
+  img.src = cfg.urls[urlIdx];
+}
+
+function applySpriteFrame(el, store, fallbackEmoji, animType, frameIdx) {
+  if (!el) return;
+  const frames = store ? store[animType] : null;
+  if (!store || !store.ready || !frames || frames.length === 0) {
+    if (!el.dataset.fallbackInit) {
+      el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-3xl sm:text-4xl animate-pulse">${fallbackEmoji}</div>`;
+      el.dataset.fallbackInit = '1';
+    }
+    return;
+  }
+  if (el.dataset.fallbackInit) {
+    el.innerHTML = '';
+    delete el.dataset.fallbackInit;
+  }
+  const safeIdx = frameIdx % frames.length;
+  el.style.backgroundImage = `url('${frames[safeIdx]}')`;
+}
+
+function startLoginHeroIdle(heroIdx) {
+  if (loginHeroTimers[heroIdx]) clearInterval(loginHeroTimers[heroIdx]);
+  let f = 0;
+  const cfg = HERO_SHEET_CONFIGS[heroIdx];
+  const el = document.getElementById(`hero-login-sprite-${heroIdx}`);
+  applySpriteFrame(el, HERO_FRAMES[heroIdx], cfg.fallbackEmoji, 'idle', 0);
+  loginHeroTimers[heroIdx] = setInterval(() => {
+    const target = document.getElementById(`hero-login-sprite-${heroIdx}`);
+    if (!target) return;
+    const len = HERO_FRAMES[heroIdx].idle.length || 1;
+    f = (f + 1) % len;
+    applySpriteFrame(target, HERO_FRAMES[heroIdx], cfg.fallbackEmoji, 'idle', f);
+  }, 125);
+}
+
+function startHeroBattleIdle(heroIdx) {
+  if (battleHeroTimer) clearInterval(battleHeroTimer);
+  battleStateLock = false;
+  let f = 0;
+  const cfg = HERO_SHEET_CONFIGS[heroIdx];
+  const el = document.getElementById('hero-battle-sprite');
+  applySpriteFrame(el, HERO_FRAMES[heroIdx], cfg.fallbackEmoji, 'idle', 0);
+  battleHeroTimer = setInterval(() => {
+    if (battleStateLock) return;
+    const target = document.getElementById('hero-battle-sprite');
+    if (!target) return;
+    const len = HERO_FRAMES[heroIdx].idle.length || 1;
+    f = (f + 1) % len;
+    applySpriteFrame(target, HERO_FRAMES[heroIdx], cfg.fallbackEmoji, 'idle', f);
+  }, 125);
+}
+
+function playHeroBattleOneShot(heroIdx, animType, frameMs, peakFrame, onPeakCallback) {
+  const store = HERO_FRAMES[heroIdx];
+  const cfg = HERO_SHEET_CONFIGS[heroIdx];
+  const frames = store ? store[animType] : null;
+  const el = document.getElementById('hero-battle-sprite');
+  if (!store || !store.ready || !frames || frames.length === 0 || !el) {
+    if (typeof onPeakCallback === 'function') onPeakCallback();
+    return;
+  }
+
+  battleStateLock = animType;
+  let f = 0;
+  applySpriteFrame(el, store, cfg.fallbackEmoji, animType, 0);
+
+  const shotTimer = setInterval(() => {
+    f++;
+    if (f === peakFrame && typeof onPeakCallback === 'function') {
+      onPeakCallback();
+    }
+    if (f < frames.length) {
+      applySpriteFrame(el, store, cfg.fallbackEmoji, animType, f);
+    } else {
+      clearInterval(shotTimer);
+      battleStateLock = false;
+      applySpriteFrame(el, store, cfg.fallbackEmoji, 'idle', 0);
+    }
+  }, frameMs);
+}
+
+function startMonsterBattleIdle(levelNum) {
+  if (monsterIdleTimer) clearInterval(monsterIdleTimer);
+  monsterStateLock = false;
+  let f = 0;
+  const cfg = MONSTER_SHEET_CONFIGS[levelNum];
+  const store = MONSTER_FRAMES[levelNum];
+  const el = document.getElementById('monster-battle-sprite');
+  applySpriteFrame(el, store, cfg.fallbackEmoji, 'idle', 0);
+
+  monsterIdleTimer = setInterval(() => {
+    if (monsterStateLock) return;
+    const target = document.getElementById('monster-battle-sprite');
+    if (!target) return;
+    const len = store.idle.length || 1;
+    f = (f + 1) % len;
+    applySpriteFrame(target, store, cfg.fallbackEmoji, 'idle', f);
+  }, 135);
+}
+
+function playMonsterOneShot(levelNum, animType, frameMs = 70) {
+  const cfg = MONSTER_SHEET_CONFIGS[levelNum];
+  const store = MONSTER_FRAMES[levelNum];
+  const frames = store ? store[animType] : null;
+  const el = document.getElementById('monster-battle-sprite');
+  if (!store || !store.ready || !frames || frames.length === 0 || !el) return;
+
+  monsterStateLock = animType;
+  let f = 0;
+  applySpriteFrame(el, store, cfg.fallbackEmoji, animType, 0);
+
+  const shotTimer = setInterval(() => {
+    f++;
+    if (f < frames.length) {
+      applySpriteFrame(el, store, cfg.fallbackEmoji, animType, f);
+    } else {
+      clearInterval(shotTimer);
+      if (animType !== 'knockdown') {
+        monsterStateLock = false;
+        applySpriteFrame(el, store, cfg.fallbackEmoji, 'idle', 0);
+      }
+    }
+  }, frameMs);
+}
+
 
 /* ================= Web Audio API 8-bit 音效生成器 ================= */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -784,7 +943,7 @@ function playSound(type, pitchStep = 0) {
   }
 }
 
-/* ================= 遊戲核心狀態與 5 關怪物配置 ================= */
+/* ================= 遊戲核心狀態 ================= */
 const gameState = {
   className: '',
   playerName: '',
@@ -802,39 +961,6 @@ const gameState = {
   monsterMaxHp: 40
 };
 
-const monsterConfigs = {
-  1: {
-    name: '史萊姆王',
-    tierDesc: '正方形/長方形・全標尺寸',
-    maxHp: 40,
-    svg: buildPixelSpriteSVG('monster_1', false)
-  },
-  2: {
-    name: '森林哥布林',
-    tierDesc: '正方形/長方形・對邊只標一個尺寸',
-    maxHp: 70,
-    svg: buildPixelSpriteSVG('monster_2', false)
-  },
-  3: {
-    name: '骷髏騎士',
-    tierDesc: 'L形/階梯形・全標尺寸',
-    maxHp: 110,
-    svg: buildPixelSpriteSVG('monster_3', false)
-  },
-  4: {
-    name: '岩石巨人',
-    tierDesc: 'T形/U形/十字形・全標尺寸',
-    maxHp: 160,
-    svg: buildPixelSpriteSVG('monster_4', false)
-  },
-  5: {
-    name: '遠古紅龍',
-    tierDesc: '直線不規則圖形・部分對邊省略尺寸',
-    maxHp: 220,
-    svg: buildPixelSpriteSVG('monster_5', false)
-  }
-};
-
 /* ================= 5個難度層級的直線平面圖形題目生成器 =================
    所有頂點皆按順時針方向排列，所有邊長皆為 1~10 cm 整數，無曲線斜線！
 ======================================================================== */
@@ -850,7 +976,6 @@ function generatePerimeterQuestion(level) {
   let scaffoldTip = '';
 
   if (level === 1) {
-    // LEVEL 1: 正方形 / 長方形 — 所有邊皆標有尺寸
     const isSquare = Math.random() < 0.4;
     if (isSquare) {
       const s = randInt(2, 7);
@@ -870,7 +995,6 @@ function generatePerimeterQuestion(level) {
       scaffoldTip = `把長方形的四條邊加起來：<br>${w} + ${h} + ${w} + ${h} = ${(w + h) * 2} cm`;
     }
   } else if (level === 2) {
-    // LEVEL 2: 正方形 / 長方形 — 一對邊只標示一個尺寸（利用對邊相等）
     const isSquare = Math.random() < 0.35;
     if (isSquare) {
       const s = randInt(3, 8);
@@ -893,7 +1017,6 @@ function generatePerimeterQuestion(level) {
       scaffoldTip = `長方形「對邊相等」！<br>兩條長都是 ${w} cm，兩條闊都是 ${h} cm：<br>${w} + ${h} + ${w} + ${h} = ${(w + h) * 2} cm`;
     }
   } else if (level === 3) {
-    // LEVEL 3: 基礎直線不規則圖形（L 形、階梯形）— 所有邊皆標有尺寸
     const subType = randInt(1, 3);
     if (subType === 1) {
       const W = randInt(5, 9);
@@ -932,7 +1055,6 @@ function generatePerimeterQuestion(level) {
     visibleEdges = path.map(() => true);
     scaffoldTip = `這個圖形共有 ${path.length} 條直邊，請順時針把外圍每一條邊的長度相加（別漏掉內凹轉角的短邊喔！）。`;
   } else if (level === 4) {
-    // LEVEL 4: 進階直線不規則圖形（T 形、凹/U 形、凸字形、十字形）— 所有邊皆標有尺寸
     const subType = randInt(1, 4);
     if (subType === 1) {
       const arm = randInt(2, 3);
@@ -991,7 +1113,6 @@ function generatePerimeterQuestion(level) {
     visibleEdges = path.map(() => true);
     scaffoldTip = `外圍共有 ${path.length} 條邊！建議從最上方開始，按順時針方向逐條加起來，或開啟「🏁 方格紙」逐格點擊確認。`;
   } else {
-    // LEVEL 5: 挑戰直線不規則圖形 — 部分對邊省略尺寸（平移法）
     const subType = randInt(1, 3);
     if (subType === 1) {
       const W = randInt(6, 10);
@@ -1063,963 +1184,13 @@ function generatePerimeterQuestion(level) {
   };
 }
 
-/* ================= 畫布、方格對齊、軟尺與繩段輔助工具 ================= */
-const mainCanvas = document.getElementById('mainCanvas');
-const mainCtx = mainCanvas.getContext('2d');
-
-let activeTool = null; // null | 'grid' | 'ruler' | 'string'
-let gridSize = 36;
-let originX = 72;
-let originY = 72;
-
-// 1. 方格紙工具狀態
-let gridSegments = [];
-let isGridSwiping = false;
-let hoverSegmentId = -1;
-let floatingPlusOnes = [];
-
-// 2. 軟尺工具狀態（圈選收緊）
-let isLassoing = false;
-let lassoPoints = [];
-let rulerTightenState = 'idle';
-let animStartLoop = [];
-let animTargetHull = [];
-let animProgress = 0;
-let rulerFailedConcave = false;
-
-// 3. 繩段工具狀態（自動磁吸貼邊）
-let isStringTracing = false;
-let densePerimeter = [];
-let stringStartIdx = -1;
-let stringCurrentIdx = -1;
-let stringUnwrapped = 0;
-let stringMinProg = 0;
-let stringMaxProg = 0;
-let stringComplete = false;
-let pointerSnapPos = null;
-
-function resizeAndLayoutCanvas() {
-  const parent = mainCanvas.parentElement;
-  if (!parent) return;
-  const cw = parent.clientWidth;
-  const ch = parent.clientHeight;
-  if (cw === 0 || ch === 0) return;
-
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  mainCanvas.width = Math.floor(cw * dpr);
-  mainCanvas.height = Math.floor(ch * dpr);
-  mainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  if (gameState.currentQuestion) {
-    computeShapeScreenLayout(cw, ch);
-    rebuildToolGeometry(true);
-  }
-  renderMainCanvas();
-}
-window.addEventListener('resize', resizeAndLayoutCanvas);
-
-function computeShapeScreenLayout(cw, ch) {
-  const q = gameState.currentQuestion;
-  const xs = q.path.map(p => p.x);
-  const ys = q.path.map(p => p.y);
-  const wCm = Math.max(...xs) - Math.min(...xs);
-  const hCm = Math.max(...ys) - Math.min(...ys);
-
-  const marginX = Math.max(68, cw * 0.16);
-  const marginY = Math.max(46, ch * 0.16);
-  const rawCell = Math.floor(Math.min((cw - marginX * 2) / wCm, (ch - marginY * 2) / hCm));
-  gridSize = Math.max(22, Math.min(46, rawCell));
-
-  const shapePxW = wCm * gridSize;
-  const shapePxH = hCm * gridSize;
-
-  originX = Math.max(gridSize, Math.round(((cw - shapePxW) / 2) / gridSize) * gridSize);
-  originY = Math.max(gridSize, Math.round(((ch - shapePxH) / 2) / gridSize) * gridSize);
-}
-
-function getScreenPolygonPoints() {
-  const q = gameState.currentQuestion;
-  return q.path.map(p => ({
-    x: originX + p.x * gridSize,
-    y: originY + p.y * gridSize
-  }));
-}
-
-function rebuildToolGeometry(preserveGridSelection = false) {
-  const q = gameState.currentQuestion;
-  if (!q) return;
-  const prevSel = preserveGridSelection ? gridSegments.map(s => s.selected) : [];
-
-  gridSegments = [];
-  let segIdx = 0;
-  for (let i = 0; i < q.path.length; i++) {
-    const p1 = q.path[i];
-    const p2 = q.path[(i + 1) % q.path.length];
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const steps = Math.round(Math.abs(dx) + Math.abs(dy));
-    const sx = dx / steps;
-    const sy = dy / steps;
-
-    for (let u = 0; u < steps; u++) {
-      gridSegments.push({
-        id: segIdx,
-        x1: originX + (p1.x + sx * u) * gridSize,
-        y1: originY + (p1.y + sy * u) * gridSize,
-        x2: originX + (p1.x + sx * (u + 1)) * gridSize,
-        y2: originY + (p1.y + sy * (u + 1)) * gridSize,
-        selected: prevSel[segIdx] || false,
-        order: 0
-      });
-      segIdx++;
-    }
-  }
-  renumberSelectedSegments();
-
-  const pts = getScreenPolygonPoints();
-  densePerimeter = [];
-  const stepPx = 4;
-  for (let i = 0; i < pts.length; i++) {
-    const p1 = pts[i];
-    const p2 = pts[(i + 1) % pts.length];
-    const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    const n = Math.max(1, Math.round(len / stepPx));
-    for (let s = 0; s < n; s++) {
-      const t = s / n;
-      densePerimeter.push({
-        x: p1.x + (p2.x - p1.x) * t,
-        y: p1.y + (p2.y - p1.y) * t
-      });
-    }
-  }
-}
-
-function renumberSelectedSegments() {
-  let num = 1;
-  gridSegments.forEach(s => { s.order = s.selected ? num++ : 0; });
-}
-
-/* ================= 工具切換與重置 ================= */
-function toggleTool(tool) {
-  initAudio();
-  if (activeTool === tool) {
-    activeTool = null;
-  } else {
-    activeTool = tool;
-  }
-
-  document.querySelectorAll('.tool-toggle').forEach(btn => btn.classList.remove('active'));
-  if (activeTool) {
-    document.getElementById(`tool-${activeTool}`).classList.add('active');
-  }
-
-  resetToolOverlay();
-}
-
-function resetToolOverlay() {
-  gridSegments.forEach(s => { s.selected = false; s.order = 0; });
-  isGridSwiping = false;
-  hoverSegmentId = -1;
-  floatingPlusOnes = [];
-
-  isLassoing = false;
-  lassoPoints = [];
-  rulerTightenState = 'idle';
-  rulerFailedConcave = false;
-  animProgress = 0;
-
-  isStringTracing = false;
-  stringStartIdx = -1;
-  stringCurrentIdx = -1;
-  stringUnwrapped = 0;
-  stringMinProg = 0;
-  stringMaxProg = 0;
-  stringComplete = false;
-  pointerSnapPos = null;
-
-  updateToolUIBars();
-  renderMainCanvas();
-}
-
-function updateToolUIBars() {
-  const promptEl = document.getElementById('stage-prompt-text');
-  const resetBtn = document.getElementById('btn-reset-tool');
-  const idleHint = document.getElementById('tool-idle-hint');
-  const gridPanel = document.getElementById('grid-count-panel');
-  const unfoldBanner = document.getElementById('unfold-banner');
-
-  resetBtn.classList.add('hidden');
-  unfoldBanner.classList.add('hidden');
-  gridPanel.classList.add('hidden');
-  gridPanel.classList.remove('flex');
-  idleHint.classList.remove('hidden');
-
-  if (!activeTool) {
-    promptEl.innerText = '請根據標示的尺寸計算周界（單位：cm）';
-    idleHint.innerText = '點選工具可開啟方格背景、軟尺或繩段';
-  } else if (activeTool === 'grid') {
-    promptEl.innerText = '🏁 方格紙已開啟（1格 = 1cm）：點擊圖形邊緣可逐格高亮數數！';
-    idleHint.classList.add('hidden');
-    gridPanel.classList.remove('hidden');
-    gridPanel.classList.add('flex');
-    const count = gridSegments.filter(s => s.selected).length;
-    document.getElementById('grid-count-val').innerText = `${count} cm`;
-    if (count > 0) resetBtn.classList.remove('hidden');
-  } else if (activeTool === 'ruler') {
-    promptEl.innerText = '📏 軟尺已開啟：在圖形外圍「畫一個大圈」包圍圖形，放手後收緊！';
-    idleHint.innerText = '在圖形外圍畫圈包圍（無法貼合內凹位）';
-    if (rulerTightenState !== 'idle') resetBtn.classList.remove('hidden');
-  } else if (activeTool === 'string') {
-    promptEl.innerText = '🧶 繩段已開啟：沿圖形邊界描繪一圈，繩段會自動磁吸貼邊！';
-    idleHint.innerText = '沿圖形邊緣畫一圈，完成後自動拉直測量';
-    if (stringStartIdx >= 0) resetBtn.classList.remove('hidden');
-  }
-}
-
-/* ================= 畫布主渲染引擎 ================= */
-function renderMainCanvas() {
-  const parent = mainCanvas.parentElement;
-  if (!parent || !gameState.currentQuestion) return;
-  const W = parent.clientWidth;
-  const H = parent.clientHeight;
-  mainCtx.clearRect(0, 0, W, H);
-
-  const q = gameState.currentQuestion;
-  const polyPts = getScreenPolygonPoints();
-
-  // 1. 方格背景
-  if (activeTool === 'grid') {
-    mainCtx.save();
-    mainCtx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
-    mainCtx.lineWidth = 1;
-    for (let x = 0; x <= W; x += gridSize) {
-      mainCtx.beginPath(); mainCtx.moveTo(x, 0); mainCtx.lineTo(x, H); mainCtx.stroke();
-    }
-    for (let y = 0; y <= H; y += gridSize) {
-      mainCtx.beginPath(); mainCtx.moveTo(0, y); mainCtx.lineTo(W, y); mainCtx.stroke();
-    }
-
-    mainCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-    mainCtx.fillRect(10, H - 28, 134, 20);
-    mainCtx.fillStyle = '#38bdf8';
-    mainCtx.font = 'bold 12px "Noto Sans TC", sans-serif';
-    mainCtx.fillText('📐 1 格邊長 = 1 cm', 16, H - 14);
-    mainCtx.restore();
-  }
-
-  // 2. 直線平面圖形本體
-  mainCtx.save();
-  mainCtx.fillStyle = 'rgba(56, 189, 248, 0.24)';
-  mainCtx.strokeStyle = '#38bdf8';
-  mainCtx.lineWidth = 4;
-  mainCtx.lineJoin = 'round';
-
-  mainCtx.beginPath();
-  mainCtx.moveTo(polyPts[0].x, polyPts[0].y);
-  for (let i = 1; i < polyPts.length; i++) {
-    mainCtx.lineTo(polyPts[i].x, polyPts[i].y);
-  }
-  mainCtx.closePath();
-  mainCtx.fill();
-  mainCtx.stroke();
-
-  mainCtx.fillStyle = '#fef08a';
-  polyPts.forEach(pt => {
-    mainCtx.beginPath();
-    mainCtx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-    mainCtx.fill();
-  });
-  mainCtx.restore();
-
-  // 3. 輔助工具疊加層
-  if (activeTool === 'grid') {
-    renderGridOverlay();
-  } else if (activeTool === 'ruler') {
-    renderRulerOverlay(polyPts);
-  } else if (activeTool === 'string') {
-    renderStringOverlay();
-  }
-
-  // 4. 尺寸標註（限 cm 為單位）
-  renderDimensionLabels(q, polyPts);
-}
-
-function renderDimensionLabels(q, polyPts) {
-  mainCtx.save();
-  mainCtx.font = 'bold 13px "Noto Sans TC", Arial, sans-serif';
-  mainCtx.textAlign = 'center';
-  mainCtx.textBaseline = 'middle';
-
-  const placedBoxes = [];
-
-  for (let i = 0; i < polyPts.length; i++) {
-    if (!q.visibleEdges[i]) continue;
-
-    const p1 = polyPts[i];
-    const p2 = polyPts[(i + 1) % polyPts.length];
-    const mx = (p1.x + p2.x) / 2;
-    const my = (p1.y + p2.y) / 2;
-
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = dy / len;
-    const ny = -dx / len;
-
-    const labelStr = `${q.edgeLengths[i]} cm`;
-    const textW = mainCtx.measureText(labelStr).width;
-    const boxW = textW + 10;
-    const boxH = 20;
-
-    let offsetDist = Math.abs(nx) > 0.5 ? (boxW / 2 + 10) : 17;
-    let lx = mx + nx * offsetDist;
-    let ly = my + ny * offsetDist;
-
-    for (let b of placedBoxes) {
-      if (Math.abs(lx - b.x) < (boxW + b.w) / 2 + 2 && Math.abs(ly - b.y) < (boxH + b.h) / 2 + 2) {
-        offsetDist += 16;
-        lx = mx + nx * offsetDist;
-        ly = my + ny * offsetDist;
-      }
-    }
-    placedBoxes.push({ x: lx, y: ly, w: boxW, h: boxH });
-
-    mainCtx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-    mainCtx.strokeStyle = '#fbbf24';
-    mainCtx.lineWidth = 1.5;
-    roundRect(mainCtx, lx - boxW / 2, ly - boxH / 2, boxW, boxH, 5);
-    mainCtx.fill();
-    mainCtx.stroke();
-
-    mainCtx.fillStyle = '#fef08a';
-    mainCtx.fillText(labelStr, lx, ly + 0.5);
-  }
-  mainCtx.restore();
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-function renderGridOverlay() {
-  if (hoverSegmentId >= 0 && gridSegments[hoverSegmentId] && !gridSegments[hoverSegmentId].selected) {
-    const h = gridSegments[hoverSegmentId];
-    mainCtx.save();
-    mainCtx.strokeStyle = 'rgba(16, 185, 129, 0.55)';
-    mainCtx.lineWidth = 10;
-    mainCtx.lineCap = 'round';
-    mainCtx.beginPath();
-    mainCtx.moveTo(h.x1, h.y1);
-    mainCtx.lineTo(h.x2, h.y2);
-    mainCtx.stroke();
-    mainCtx.restore();
-  }
-
-  gridSegments.forEach(seg => {
-    if (seg.selected) {
-      mainCtx.save();
-      mainCtx.shadowColor = '#10b981';
-      mainCtx.shadowBlur = 10;
-      mainCtx.strokeStyle = '#10b981';
-      mainCtx.lineWidth = 8;
-      mainCtx.lineCap = 'round';
-      mainCtx.beginPath();
-      mainCtx.moveTo(seg.x1, seg.y1);
-      mainCtx.lineTo(seg.x2, seg.y2);
-      mainCtx.stroke();
-
-      mainCtx.shadowBlur = 0;
-      mainCtx.strokeStyle = '#a7f3d0';
-      mainCtx.lineWidth = 2.5;
-      mainCtx.stroke();
-      mainCtx.restore();
-    }
-  });
-
-  mainCtx.save();
-  gridSegments.forEach(seg => {
-    mainCtx.fillStyle = seg.selected ? '#059669' : '#0f172a';
-    mainCtx.strokeStyle = seg.selected ? '#ffffff' : '#38bdf8';
-    mainCtx.lineWidth = 1.8;
-    mainCtx.beginPath();
-    mainCtx.arc(seg.x1, seg.y1, 3.5, 0, Math.PI * 2);
-    mainCtx.fill();
-    mainCtx.stroke();
-  });
-  mainCtx.restore();
-
-  gridSegments.forEach(seg => {
-    if (seg.selected && seg.order > 0) {
-      const mx = (seg.x1 + seg.x2) / 2;
-      const my = (seg.y1 + seg.y2) / 2;
-      mainCtx.save();
-      mainCtx.fillStyle = '#065f46';
-      mainCtx.strokeStyle = '#ffffff';
-      mainCtx.lineWidth = 1.5;
-      mainCtx.beginPath();
-      mainCtx.arc(mx, my, 9, 0, Math.PI * 2);
-      mainCtx.fill();
-      mainCtx.stroke();
-
-      mainCtx.fillStyle = '#ffffff';
-      mainCtx.font = 'bold 10px Arial';
-      mainCtx.textAlign = 'center';
-      mainCtx.textBaseline = 'middle';
-      mainCtx.fillText(seg.order, mx, my + 0.5);
-      mainCtx.restore();
-    }
-  });
-
-  floatingPlusOnes.forEach(fp => {
-    mainCtx.save();
-    mainCtx.globalAlpha = fp.alpha;
-    mainCtx.fillStyle = fp.color;
-    mainCtx.font = 'bold 16px "Noto Sans TC", sans-serif';
-    mainCtx.textAlign = 'center';
-    mainCtx.fillText(fp.text, fp.x, fp.y + fp.offsetY);
-    mainCtx.restore();
-  });
-}
-
-function renderRulerOverlay(polyPts) {
-  if (isLassoing && lassoPoints.length > 1) {
-    drawTapeLoop(lassoPoints, false, false);
-  } else if (rulerTightenState === 'animating' || rulerTightenState === 'done') {
-    const ease = 1 - Math.pow(1 - animProgress, 3);
-    const currentLoop = animStartLoop.map((p, idx) => ({
-      x: p.x + (animTargetHull[idx].x - p.x) * ease,
-      y: p.y + (animTargetHull[idx].y - p.y) * ease
-    }));
-
-    if (rulerTightenState === 'done' && rulerFailedConcave) {
-      mainCtx.save();
-      mainCtx.fillStyle = 'rgba(244, 63, 94, 0.32)';
-      mainCtx.beginPath();
-      mainCtx.moveTo(animTargetHull[0].x, animTargetHull[0].y);
-      for (let i = 1; i < animTargetHull.length; i++) {
-        mainCtx.lineTo(animTargetHull[i].x, animTargetHull[i].y);
-      }
-      mainCtx.closePath();
-      mainCtx.moveTo(polyPts[0].x, polyPts[0].y);
-      for (let i = 1; i < polyPts.length; i++) {
-        mainCtx.lineTo(polyPts[i].x, polyPts[i].y);
-      }
-      mainCtx.closePath();
-      mainCtx.fill('evenodd');
-      mainCtx.restore();
-    }
-
-    drawTapeLoop(currentLoop, true, rulerTightenState === 'done' && rulerFailedConcave);
-  }
-}
-
-function drawTapeLoop(pts, closed, isError) {
-  if (pts.length < 2) return;
-  mainCtx.save();
-  mainCtx.strokeStyle = isError ? '#f43f5e' : '#eab308';
-  mainCtx.lineWidth = 9;
-  mainCtx.lineCap = 'round';
-  mainCtx.lineJoin = 'round';
-
-  mainCtx.beginPath();
-  mainCtx.moveTo(pts[0].x, pts[0].y);
-  for (let i = 1; i < pts.length; i++) {
-    mainCtx.lineTo(pts[i].x, pts[i].y);
-  }
-  if (closed) mainCtx.closePath();
-  mainCtx.stroke();
-
-  mainCtx.strokeStyle = isError ? '#ffe4e6' : '#fef08a';
-  mainCtx.lineWidth = 4;
-  mainCtx.stroke();
-
-  mainCtx.strokeStyle = isError ? '#9f1239' : '#854d0e';
-  mainCtx.lineWidth = 2;
-  mainCtx.setLineDash([2, 8]);
-  mainCtx.stroke();
-  mainCtx.restore();
-}
-
-function renderStringOverlay() {
-  if (densePerimeter.length === 0) return;
-  const M = densePerimeter.length;
-
-  if (stringStartIdx >= 0) {
-    const sp = densePerimeter[stringStartIdx];
-    mainCtx.save();
-    mainCtx.fillStyle = '#10b981';
-    mainCtx.strokeStyle = '#ffffff';
-    mainCtx.lineWidth = 2.5;
-    mainCtx.beginPath();
-    mainCtx.arc(sp.x, sp.y, 7, 0, Math.PI * 2);
-    mainCtx.fill();
-    mainCtx.stroke();
-    mainCtx.restore();
-  }
-
-  const span = stringMaxProg - stringMinProg;
-  if (span > 0) {
-    mainCtx.save();
-    mainCtx.strokeStyle = '#ef4444';
-    mainCtx.lineWidth = 7;
-    mainCtx.lineCap = 'round';
-    mainCtx.lineJoin = 'round';
-
-    mainCtx.beginPath();
-    const totalSteps = Math.min(M, span);
-    for (let s = 0; s <= totalSteps; s++) {
-      const idx = (((stringStartIdx + stringMinProg + s) % M) + M) % M;
-      const pt = densePerimeter[idx];
-      if (s === 0) mainCtx.moveTo(pt.x, pt.y);
-      else mainCtx.lineTo(pt.x, pt.y);
-    }
-    if (stringComplete) mainCtx.closePath();
-    mainCtx.stroke();
-
-    mainCtx.strokeStyle = '#fecaca';
-    mainCtx.lineWidth = 2;
-    mainCtx.setLineDash([5, 5]);
-    mainCtx.stroke();
-    mainCtx.restore();
-  }
-
-  if (isStringTracing && pointerSnapPos && !stringComplete) {
-    mainCtx.save();
-    mainCtx.strokeStyle = 'rgba(248, 113, 113, 0.55)';
-    mainCtx.lineWidth = 2;
-    mainCtx.setLineDash([3, 3]);
-    mainCtx.beginPath();
-    mainCtx.moveTo(pointerSnapPos.fingerX, pointerSnapPos.fingerY);
-    mainCtx.lineTo(pointerSnapPos.snapX, pointerSnapPos.snapY);
-    mainCtx.stroke();
-
-    mainCtx.setLineDash([]);
-    mainCtx.fillStyle = '#ef4444';
-    mainCtx.beginPath();
-    mainCtx.arc(pointerSnapPos.snapX, pointerSnapPos.snapY, 6, 0, Math.PI * 2);
-    mainCtx.fill();
-    mainCtx.restore();
-  }
-}
-
-/* ================= 畫布指標互動 ================= */
-mainCanvas.addEventListener('pointerdown', (e) => {
-  if (!activeTool || !gameState.currentQuestion) return;
-  initAudio();
-  const rect = mainCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  if (activeTool === 'grid') {
-    const hitSeg = findNearestGridSegment(x, y, 22);
-    if (hitSeg) {
-      hitSeg.selected = !hitSeg.selected;
-      renumberSelectedSegments();
-      const count = gridSegments.filter(s => s.selected).length;
-      if (hitSeg.selected) {
-        playSound('tick_add', count);
-        spawnFloatingPlusOne((hitSeg.x1 + hitSeg.x2) / 2, (hitSeg.y1 + hitSeg.y2) / 2, true);
-        isGridSwiping = true;
-      } else {
-        playSound('tick_remove');
-        spawnFloatingPlusOne((hitSeg.x1 + hitSeg.x2) / 2, (hitSeg.y1 + hitSeg.y2) / 2, false);
-      }
-      updateToolUIBars();
-      renderMainCanvas();
-    }
-  } else if (activeTool === 'ruler') {
-    if (rulerTightenState === 'animating') return;
-    resetToolOverlay();
-    isLassoing = true;
-    lassoPoints = [{ x, y }];
-    renderMainCanvas();
-  } else if (activeTool === 'string') {
-    if (stringComplete) return;
-    const nearest = findNearestBoundaryPoint(x, y, 0, densePerimeter.length, true);
-    if (nearest && nearest.dist <= 75) {
-      isStringTracing = true;
-      if (stringStartIdx === -1) {
-        stringStartIdx = nearest.index;
-        stringCurrentIdx = nearest.index;
-        stringUnwrapped = 0;
-        stringMinProg = 0;
-        stringMaxProg = 0;
-        playSound('tick_add', 2);
-      } else {
-        const M = densePerimeter.length;
-        const endIdx1 = (((stringStartIdx + stringMinProg) % M) + M) % M;
-        const endIdx2 = (((stringStartIdx + stringMaxProg) % M) + M) % M;
-        const d1 = Math.hypot(x - densePerimeter[endIdx1].x, y - densePerimeter[endIdx1].y);
-        const d2 = Math.hypot(x - densePerimeter[endIdx2].x, y - densePerimeter[endIdx2].y);
-        if (d1 < d2 && d1 <= 75) {
-          stringCurrentIdx = endIdx1;
-          stringUnwrapped = stringMinProg;
-        } else if (d2 <= 75) {
-          stringCurrentIdx = endIdx2;
-          stringUnwrapped = stringMaxProg;
-        } else {
-          stringStartIdx = nearest.index;
-          stringCurrentIdx = nearest.index;
-          stringUnwrapped = 0;
-          stringMinProg = 0;
-          stringMaxProg = 0;
-        }
-      }
-      pointerSnapPos = {
-        fingerX: x, fingerY: y,
-        snapX: densePerimeter[stringCurrentIdx].x,
-        snapY: densePerimeter[stringCurrentIdx].y
-      };
-      updateToolUIBars();
-      renderMainCanvas();
-    }
-  }
-});
-
-window.addEventListener('pointermove', (e) => {
-  if (!activeTool || !gameState.currentQuestion) return;
-  const rect = mainCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  if (activeTool === 'grid') {
-    const nearSeg = findNearestGridSegment(x, y, 20);
-    const newHoverId = nearSeg ? nearSeg.id : -1;
-    if (newHoverId !== hoverSegmentId) {
-      hoverSegmentId = newHoverId;
-      renderMainCanvas();
-    }
-    if (isGridSwiping && nearSeg && !nearSeg.selected) {
-      nearSeg.selected = true;
-      renumberSelectedSegments();
-      const count = gridSegments.filter(s => s.selected).length;
-      playSound('tick_add', count);
-      spawnFloatingPlusOne((nearSeg.x1 + nearSeg.x2) / 2, (nearSeg.y1 + nearSeg.y2) / 2, true);
-      updateToolUIBars();
-      renderMainCanvas();
-    }
-  } else if (activeTool === 'ruler' && isLassoing) {
-    const last = lassoPoints[lassoPoints.length - 1];
-    if (Math.hypot(x - last.x, y - last.y) > 6) {
-      lassoPoints.push({ x, y });
-      renderMainCanvas();
-    }
-  } else if (activeTool === 'string' && isStringTracing && !stringComplete) {
-    const M = densePerimeter.length;
-    const nearest = findNearestBoundaryPoint(x, y, stringCurrentIdx, 30, false);
-    if (nearest && nearest.dist <= 95) {
-      let delta = nearest.index - stringCurrentIdx;
-      if (delta > M / 2) delta -= M;
-      if (delta < -M / 2) delta += M;
-
-      stringCurrentIdx = nearest.index;
-      stringUnwrapped += delta;
-      if (stringUnwrapped < stringMinProg) stringMinProg = stringUnwrapped;
-      if (stringUnwrapped > stringMaxProg) stringMaxProg = stringUnwrapped;
-
-      pointerSnapPos = {
-        fingerX: x, fingerY: y,
-        snapX: densePerimeter[stringCurrentIdx].x,
-        snapY: densePerimeter[stringCurrentIdx].y
-      };
-
-      if ((stringMaxProg - stringMinProg) >= Math.floor(M * 0.96)) {
-        stringMaxProg = stringMinProg + M;
-        stringComplete = true;
-        isStringTracing = false;
-        pointerSnapPos = null;
-        playSound('correct');
-        showUnfoldedTool('string', gameState.currentQuestion.perimeter);
-      }
-      renderMainCanvas();
-    }
-  }
-});
-
-window.addEventListener('pointerup', () => {
-  if (isGridSwiping) isGridSwiping = false;
-
-  if (activeTool === 'ruler' && isLassoing) {
-    isLassoing = false;
-    finalizeRulerLasso();
-  }
-
-  if (isStringTracing) {
-    isStringTracing = false;
-    pointerSnapPos = null;
-    renderMainCanvas();
-  }
-});
-
-/* --- 幾何輔助函數 --- */
-function distToSegment(px, py, x1, y1, x2, y2) {
-  const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
-  if (l2 === 0) return Math.hypot(px - x1, py - y1);
-  let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
-  t = Math.max(0, Math.min(1, t));
-  return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
-}
-
-function findNearestGridSegment(px, py, maxDist) {
-  let best = null, minD = maxDist;
-  for (let seg of gridSegments) {
-    const d = distToSegment(px, py, seg.x1, seg.y1, seg.x2, seg.y2);
-    if (d < minD) { minD = d; best = seg; }
-  }
-  return best;
-}
-
-function findNearestBoundaryPoint(x, y, centerIdx, radius, searchAll) {
-  const M = densePerimeter.length;
-  if (M === 0) return null;
-  let bestIdx = -1, minDist = Infinity;
-  if (searchAll) {
-    for (let i = 0; i < M; i++) {
-      const d = Math.hypot(x - densePerimeter[i].x, y - densePerimeter[i].y);
-      if (d < minDist) { minDist = d; bestIdx = i; }
-    }
-  } else {
-    for (let off = -radius; off <= radius; off++) {
-      const i = (((centerIdx + off) % M) + M) % M;
-      const d = Math.hypot(x - densePerimeter[i].x, y - densePerimeter[i].y);
-      if (d < minDist) { minDist = d; bestIdx = i; }
-    }
-  }
-  return { index: bestIdx, dist: minDist };
-}
-
-function spawnFloatingPlusOne(x, y, isAdd) {
-  const item = {
-    x, y: y - 8,
-    text: isAdd ? '+1 cm' : '-1 cm',
-    color: isAdd ? '#34d399' : '#fb7185',
-    alpha: 1, offsetY: 0
-  };
-  floatingPlusOnes.push(item);
-  const start = performance.now();
-  function anim(now) {
-    const t = Math.min(1, (now - start) / 500);
-    item.offsetY = -20 * t;
-    item.alpha = 1 - t;
-    renderMainCanvas();
-    if (t < 1) requestAnimationFrame(anim);
-    else {
-      floatingPlusOnes = floatingPlusOnes.filter(f => f !== item);
-      renderMainCanvas();
-    }
-  }
-  requestAnimationFrame(anim);
-}
-
-function computeConvexHull(points) {
-  const pts = points.map(p => ({ x: p.x, y: p.y }))
-    .sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
-  if (pts.length <= 2) return pts;
-  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-  const lower = [];
-  for (let p of pts) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
-    lower.push(p);
-  }
-  const upper = [];
-  for (let i = pts.length - 1; i >= 0; i--) {
-    const p = pts[i];
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
-    upper.push(p);
-  }
-  upper.pop(); lower.pop();
-  return lower.concat(upper);
-}
-
-function resampleClosedLoop(points, numSamples, refAngle) {
-  if (points.length < 3) return [];
-  const cumLen = [0];
-  let total = 0;
-  for (let i = 0; i < points.length; i++) {
-    const p1 = points[i], p2 = points[(i + 1) % points.length];
-    total += Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    cumLen.push(total);
-  }
-  if (total === 0) return points;
-  const sampled = [];
-  for (let k = 0; k < numSamples; k++) {
-    const targetDist = (k / numSamples) * total;
-    let seg = 0;
-    while (seg < points.length - 1 && cumLen[seg + 1] < targetDist) seg++;
-    const d0 = cumLen[seg], d1 = cumLen[seg + 1];
-    const t = d1 > d0 ? (targetDist - d0) / (d1 - d0) : 0;
-    const p1 = points[seg], p2 = points[(seg + 1) % points.length];
-    sampled.push({ x: p1.x + (p2.x - p1.x) * t, y: p1.y + (p2.y - p1.y) * t });
-  }
-  const cx = sampled.reduce((s, p) => s + p.x, 0) / numSamples;
-  const cy = sampled.reduce((s, p) => s + p.y, 0) / numSamples;
-  let bestIdx = 0, minDiff = Infinity;
-  for (let i = 0; i < numSamples; i++) {
-    const ang = Math.atan2(sampled[i].y - cy, sampled[i].x - cx);
-    let diff = Math.abs(ang - refAngle);
-    if (diff > Math.PI) diff = 2 * Math.PI - diff;
-    if (diff < minDiff) { minDiff = diff; bestIdx = i; }
-  }
-  return sampled.slice(bestIdx).concat(sampled.slice(0, bestIdx));
-}
-
-function isPointInPolygon(pt, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
-    const intersect = ((yi > pt.y) !== (yj > pt.y)) &&
-      (pt.x < (xj - xi) * (pt.y - yi) / ((yj - yi) || 1e-6) + xi);
-    if (intersect) inside = !inside;
-  }
-  return inside;
-}
-
-function finalizeRulerLasso() {
-  if (lassoPoints.length < 10) {
-    lassoPoints = [];
-    renderMainCanvas();
-    return;
-  }
-  const polyPts = getScreenPolygonPoints();
-  const cx = polyPts.reduce((s, p) => s + p.x, 0) / polyPts.length;
-  const cy = polyPts.reduce((s, p) => s + p.y, 0) / polyPts.length;
-  const insideCount = polyPts.filter(p => isPointInPolygon(p, lassoPoints)).length;
-
-  if (!isPointInPolygon({ x: cx, y: cy }, lassoPoints) || insideCount < polyPts.length * 0.6) {
-    playSound('encourage');
-    lassoPoints = [];
-    renderMainCanvas();
-    return;
-  }
-
-  const hull = computeConvexHull(polyPts);
-  const refAngle = Math.atan2(hull[0].y - cy, hull[0].x - cx);
-  animStartLoop = resampleClosedLoop(lassoPoints, 120, refAngle);
-  animTargetHull = resampleClosedLoop(hull, 120, refAngle);
-  animProgress = 0;
-  rulerTightenState = 'animating';
-  document.getElementById('btn-reset-tool').classList.remove('hidden');
-  playSound('tighten');
-
-  const startTime = performance.now();
-  function stepAnim(now) {
-    animProgress = Math.min(1, (now - startTime) / 560);
-    renderMainCanvas();
-    if (animProgress < 1) {
-      requestAnimationFrame(stepAnim);
-    } else {
-      rulerTightenState = 'done';
-      const q = gameState.currentQuestion;
-      const isConcave = q.path.length > 4;
-      if (isConcave) {
-        rulerFailedConcave = true;
-        playSound('encourage');
-        showUnfoldWarning('⚠️ 軟尺收緊後直接拉直跨過內凹位（量度偏短），請改用【🧶 繩段】或【🏁 方格紙】！');
-      } else {
-        rulerFailedConcave = false;
-        playSound('correct');
-        showUnfoldedTool('ruler', q.perimeter);
-      }
-      renderMainCanvas();
-    }
-  }
-  requestAnimationFrame(stepAnim);
-}
-
-function showUnfoldWarning(msg) {
-  const banner = document.getElementById('unfold-banner');
-  const warnEl = document.getElementById('unfold-warn-text');
-  const uCanvas = document.getElementById('unfoldCanvas');
-  banner.classList.remove('hidden');
-  uCanvas.classList.add('hidden');
-  warnEl.classList.remove('hidden');
-  warnEl.innerText = msg;
-}
-
-function showUnfoldedTool(type, totalCm) {
-  const banner = document.getElementById('unfold-banner');
-  const warnEl = document.getElementById('unfold-warn-text');
-  const uCanvas = document.getElementById('unfoldCanvas');
-  banner.classList.remove('hidden');
-  warnEl.classList.add('hidden');
-  uCanvas.classList.remove('hidden');
-  document.getElementById('btn-reset-tool').classList.remove('hidden');
-
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const cw = uCanvas.clientWidth || 400;
-  const ch = 38;
-  uCanvas.width = cw * dpr;
-  uCanvas.height = ch * dpr;
-  const ctx = uCanvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, cw, ch);
-
-  const padL = 18, padR = 22;
-  const barW = cw - padL - padR;
-
-  if (type === 'ruler') {
-    ctx.fillStyle = '#fef08a';
-    ctx.strokeStyle = '#ca8a04';
-    ctx.lineWidth = 1.5;
-    ctx.fillRect(padL, 6, barW, 24);
-    ctx.strokeRect(padL, 6, barW, 24);
-
-    const step = barW / totalCm;
-    ctx.fillStyle = '#713f12';
-    ctx.font = 'bold 10px Arial';
-    ctx.textAlign = 'center';
-    for (let i = 0; i <= totalCm; i++) {
-      const x = padL + i * step;
-      ctx.beginPath();
-      ctx.moveTo(x, 6);
-      ctx.lineTo(x, i % 2 === 0 ? 15 : 11);
-      ctx.stroke();
-      if (i % 2 === 0 || i === totalCm) {
-        ctx.fillText(i, x, 26);
-      }
-    }
-  } else if (type === 'string') {
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(padL, 26);
-    ctx.lineTo(padL + barW, 26);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#fecaca';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.fillStyle = '#10b981';
-    ctx.beginPath(); ctx.arc(padL, 26, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#b91c1c';
-    ctx.beginPath(); ctx.arc(padL + barW, 26, 5, 0, Math.PI * 2); ctx.fill();
-
-    ctx.fillStyle = '#fef08a';
-    ctx.font = 'bold 13px "Noto Sans TC", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`🧶 拉直繩段總長度 = ${totalCm} cm`, cw / 2, 13);
-  }
-}
-
 /* ================= RPG 遊戲流程控制 ================= */
 function renderHeroSelectionPreviews() {
   for (let i = 0; i < 4; i++) {
     const slot = document.getElementById(`hero-preview-${i}`);
-    if (slot) slot.innerHTML = heroSVGs[i];
+    if (!slot) continue;
+    slot.innerHTML = `<div id="hero-login-sprite-${i}" class="sheet-sprite"></div>`;
+    startLoginHeroIdle(i);
   }
 }
 
@@ -2061,15 +1232,18 @@ function startGame() {
   document.getElementById('screen-login').classList.add('hidden');
   document.getElementById('screen-game').classList.remove('hidden');
 
+  const hIdx = gameState.selectedHeroIndex;
   document.getElementById('display-player-name').innerText = playerName;
-  document.getElementById('player-sprite').innerHTML = heroSVGs[gameState.selectedHeroIndex];
+  document.getElementById('player-sprite').innerHTML = `<div id="hero-battle-sprite" class="sheet-sprite"></div>`;
+  document.getElementById('slash-svg').innerHTML = HERO_SHEET_CONFIGS[hIdx].slashSVG;
+  startHeroBattleIdle(hIdx);
 
   loadLevel(1);
 }
 
 function loadLevel(levelNum) {
   gameState.level = levelNum;
-  const mConfig = monsterConfigs[levelNum];
+  const mConfig = MONSTER_SHEET_CONFIGS[levelNum];
   gameState.monsterMaxHp = mConfig.maxHp;
   gameState.monsterHp = mConfig.maxHp;
 
@@ -2077,7 +1251,8 @@ function loadLevel(levelNum) {
   document.getElementById('level-tier-desc').innerText = mConfig.tierDesc;
   document.getElementById('monster-name-tag').innerText = mConfig.name;
   document.getElementById('display-monster-name').innerText = mConfig.name;
-  document.getElementById('monster-sprite').innerHTML = mConfig.svg;
+  document.getElementById('monster-sprite').innerHTML = `<div id="monster-battle-sprite" class="sheet-sprite"></div>`;
+  startMonsterBattleIdle(levelNum);
 
   updateUI();
   nextQuestion();
@@ -2134,10 +1309,12 @@ function checkAnswer() {
 
     const rawDmg = Math.round(gameState.str / (timeSpent / 10) / (1 + gameState.level * 0.1));
     const damage = Math.max(1, rawDmg);
-    playAttackAnimation(damage);
+    const willDefeat = (gameState.monsterHp - damage) <= 0;
+
+    playAttackAnimation(damage, willDefeat);
 
     gameState.monsterHp -= damage;
-    if (gameState.monsterHp <= 0) {
+    if (willDefeat) {
       gameState.monsterHp = 0;
       updateUI();
       setTimeout(() => {
@@ -2147,20 +1324,23 @@ function checkAnswer() {
         } else {
           showVictory();
         }
-      }, 700);
+      }, 860);
     } else {
       updateUI();
-      setTimeout(nextQuestion, 600);
+      setTimeout(nextQuestion, 680);
     }
 
     if (gameState.streak > 0 && gameState.streak % 3 === 0) {
-      setTimeout(showTreasureChestModal, 750);
+      setTimeout(showTreasureChestModal, 900);
     }
   } else {
     playSound('encourage');
     gameState.streak = 0;
     gameState.hearts--;
     gameState.totalErrors++;
+
+    const isKnockdown = gameState.hearts <= 0;
+    playHurtAnimation(isKnockdown);
 
     gameState.errorLogs.push({
       level: gameState.level,
@@ -2171,20 +1351,20 @@ function checkAnswer() {
 
     updateUI();
 
-    if (gameState.hearts <= 0) {
+    if (isKnockdown) {
       if (gameState.level > 1) gameState.level--;
       gameState.hearts = 5;
       setTimeout(() => {
         loadLevel(gameState.level);
         showScaffoldingModal(userVal, q);
-      }, 350);
+      }, 650);
     } else {
       showScaffoldingModal(userVal, q);
     }
   }
 }
 
-function playAttackAnimation(dmg) {
+function triggerMonsterHitFX(dmg, isDefeated = false) {
   playSound('hit');
   const slash = document.getElementById('slash-effect');
   const dmgText = document.getElementById('damage-text');
@@ -2195,11 +1375,41 @@ function playAttackAnimation(dmg) {
   dmgText.classList.remove('hidden');
   monsterSprite.classList.add('shake');
 
+  playMonsterOneShot(gameState.level, isDefeated ? 'knockdown' : 'hurt', 65);
+
   setTimeout(() => {
     slash.classList.add('hidden');
     dmgText.classList.add('hidden');
     monsterSprite.classList.remove('shake');
-  }, 650);
+  }, 600);
+}
+
+function playAttackAnimation(dmg, isDefeated = false) {
+  const hIdx = gameState.selectedHeroIndex;
+  const cfg = HERO_SHEET_CONFIGS[hIdx];
+  const atk = cfg.anims.attack;
+  const playerSprite = document.getElementById('player-sprite');
+
+  playerSprite.style.transform = `translateX(${atk.lungeX}px) scale(1.1)`;
+  playHeroBattleOneShot(hIdx, 'attack', atk.frameMs, atk.peakFrame, () => {
+    triggerMonsterHitFX(dmg, isDefeated);
+  });
+
+  const totalDur = atk.cols.length * atk.frameMs;
+  setTimeout(() => {
+    playerSprite.style.transform = 'translateX(0px) scale(1)';
+  }, totalDur);
+}
+
+function playHurtAnimation(isKnockdown = false) {
+  const hIdx = gameState.selectedHeroIndex;
+  const playerSprite = document.getElementById('player-sprite');
+
+  playerSprite.style.transform = isKnockdown ? 'translateX(-14px)' : 'translateX(-10px)';
+  playHeroBattleOneShot(hIdx, isKnockdown ? 'knockdown' : 'hurt', 70, -1, null);
+  setTimeout(() => {
+    playerSprite.style.transform = 'translateX(0px)';
+  }, isKnockdown ? 620 : 440);
 }
 
 /* ================= 動態鷹架 Modal ================= */
@@ -2301,7 +1511,27 @@ function sendToGoogleForm(data) {
   }).catch(e => console.log('Google Form send attempt:', e));
 }
 
-// 初始化登入畫面的 24x24 勇者預覽圖
+// 預載四大勇者精靈圖
+for (let i = 0; i < 4; i++) {
+  loadSpriteSheet(HERO_SHEET_CONFIGS[i], HERO_FRAMES[i], () => {
+    const cfg = HERO_SHEET_CONFIGS[i];
+    applySpriteFrame(document.getElementById(`hero-login-sprite-${i}`), HERO_FRAMES[i], cfg.fallbackEmoji, 'idle', 0);
+    if (gameState.selectedHeroIndex === i) {
+      applySpriteFrame(document.getElementById('hero-battle-sprite'), HERO_FRAMES[i], cfg.fallbackEmoji, 'idle', 0);
+    }
+  });
+}
+
+// 預載五關怪物精靈圖
+for (let lvl = 1; lvl <= 5; lvl++) {
+  loadSpriteSheet(MONSTER_SHEET_CONFIGS[lvl], MONSTER_FRAMES[lvl], () => {
+    const cfg = MONSTER_SHEET_CONFIGS[lvl];
+    if (gameState.level === lvl) {
+      applySpriteFrame(document.getElementById('monster-battle-sprite'), MONSTER_FRAMES[lvl], cfg.fallbackEmoji, 'idle', 0);
+    }
+  });
+}
+
 renderHeroSelectionPreviews();
 </script>
 </body>
