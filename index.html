@@ -10,6 +10,7 @@
   html, body {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     margin: 0;
     padding: 0;
     overflow: hidden !important;
@@ -18,8 +19,32 @@
     -webkit-user-select: none;
     user-select: none;
     box-sizing: border-box;
-    background-color: #0f172a;
+    background-color: #070b14;
+    background-image: radial-gradient(circle at 50% 50%, #162036 0%, #070b14 100%);
     font-family: 'Noto Sans TC', "Microsoft JhengHei", "PingFang HK", sans-serif;
+  }
+
+  /* iPad 9 (1024x768 / 1080x810 CSS viewport) 外圍留白邊框適配 */
+  .app-viewport-frame {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .game-shell {
+    width: 100%;
+    height: 100%;
+    max-width: 1016px;
+    max-height: 736px;
+    box-shadow: 0 0 0 3px #000, 0 12px 36px rgba(0, 0, 0, 0.75);
   }
 
   .pixel-font {
@@ -103,64 +128,64 @@
   }
 </style>
 </head>
-<body class="w-full h-full text-slate-100 flex items-center justify-center p-1 sm:p-2 select-none">
+<body class="app-viewport-frame text-slate-100 select-none">
 
-  <!-- 主遊戲容器 -->
-  <div class="w-full h-full max-w-6xl bg-slate-800 rounded-xl pixel-box border-2 border-slate-700 flex flex-col justify-between overflow-hidden relative p-1.5 sm:p-2.5">
+  <!-- 主遊戲容器（適配 iPad 9 瀏覽器視窗並保留外圍邊框留白） -->
+  <div class="game-shell bg-slate-800 rounded-2xl pixel-box border-2 border-slate-600 flex flex-col justify-between overflow-hidden relative p-2 sm:p-3">
 
     <!-- ================= 1. 登入與角色選擇畫面 ================= -->
-    <div id="screen-login" class="w-full h-full flex flex-col items-center justify-between p-2 sm:p-4 overflow-y-auto">
+    <div id="screen-login" class="w-full h-full flex flex-col items-center justify-between py-1 px-2 sm:py-2 sm:px-4 overflow-hidden">
       
-      <div class="text-center space-y-1">
-        <span class="bg-amber-500 text-black px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase">SEN 特教數學互動遊戲</span>
-        <h1 class="text-2xl sm:text-4xl font-extrabold text-amber-400 drop-shadow-[0_3px_0_#000]">晨崗數學勇者‧周界篇</h1>
-        <p class="text-slate-300 text-sm sm:text-base">平面圖形周界計算 RPG 冒險（配備方格、軟尺、繩段工具）</p>
+      <div class="text-center space-y-0.5 shrink-0">
+        <span class="bg-amber-500 text-black px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase">SEN 特教數學互動遊戲</span>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-amber-400 drop-shadow-[0_3px_0_#000]">晨崗數學勇者‧周界篇</h1>
+        <p class="text-slate-300 text-xs sm:text-sm">平面圖形周界計算 RPG 冒險（配備方格、軟尺、繩段工具）</p>
       </div>
 
       <!-- 學生個人資料輸入區 -->
-      <div class="w-full max-w-md bg-slate-700/80 p-3 sm:p-4 rounded-xl border-2 border-slate-600 space-y-2">
+      <div class="w-full max-w-md bg-slate-700/80 p-2.5 sm:p-3 rounded-xl border-2 border-slate-600 space-y-1.5 shrink-0">
         <div class="flex items-center space-x-2">
-          <label class="w-16 font-extrabold text-lg text-amber-300">班別：</label>
-          <input type="text" id="input-class" placeholder="例：3A" class="flex-1 p-2 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-lg focus:outline-none">
+          <label class="w-16 font-extrabold text-base sm:text-lg text-amber-300">班別：</label>
+          <input type="text" id="input-class" placeholder="例：3A" class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-base sm:text-lg focus:outline-none">
         </div>
         <div class="flex items-center space-x-2">
-          <label class="w-16 font-extrabold text-lg text-amber-300">姓名：</label>
-          <input type="text" id="input-name" placeholder="請輸入姓名" class="flex-1 p-2 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-lg focus:outline-none">
+          <label class="w-16 font-extrabold text-base sm:text-lg text-amber-300">姓名：</label>
+          <input type="text" id="input-name" placeholder="請輸入姓名" class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white border-2 border-amber-400 text-base sm:text-lg focus:outline-none">
         </div>
       </div>
 
       <!-- 勇者職業選擇 -->
-      <div class="w-full max-w-2xl text-center space-y-2">
-        <h2 class="text-base sm:text-lg font-bold text-slate-200">請選擇你的勇者職業：</h2>
+      <div class="w-full max-w-2xl text-center space-y-1.5 shrink-0">
+        <h2 class="text-sm sm:text-base font-bold text-slate-200">請選擇你的勇者職業：</h2>
         <div class="grid grid-cols-4 gap-2 sm:gap-3" id="hero-selector">
-          <div onclick="selectHero(0)" id="hero-card-0" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-amber-400 flex flex-col items-center transition transform active:scale-95">
+          <div onclick="selectHero(0)" id="hero-card-0" class="hero-card cursor-pointer p-1.5 sm:p-2 bg-slate-700 rounded-xl border-4 border-amber-400 flex flex-col items-center transition transform active:scale-95">
             <div id="hero-preview-0" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
-            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">熱血騎士</span>
+            <span class="mt-1 font-extrabold text-amber-300 text-xs sm:text-sm">熱血騎士</span>
           </div>
-          <div onclick="selectHero(1)" id="hero-card-1" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+          <div onclick="selectHero(1)" id="hero-card-1" class="hero-card cursor-pointer p-1.5 sm:p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
             <div id="hero-preview-1" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
-            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">魔法女傑</span>
+            <span class="mt-1 font-extrabold text-amber-300 text-xs sm:text-sm">魔法女傑</span>
           </div>
-          <div onclick="selectHero(2)" id="hero-card-2" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+          <div onclick="selectHero(2)" id="hero-card-2" class="hero-card cursor-pointer p-1.5 sm:p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
             <div id="hero-preview-2" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
-            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">森林遊俠</span>
+            <span class="mt-1 font-extrabold text-amber-300 text-xs sm:text-sm">森林遊俠</span>
           </div>
-          <div onclick="selectHero(3)" id="hero-card-3" class="hero-card cursor-pointer p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
+          <div onclick="selectHero(3)" id="hero-card-3" class="hero-card cursor-pointer p-1.5 sm:p-2 bg-slate-700 rounded-xl border-4 border-transparent flex flex-col items-center transition transform active:scale-95">
             <div id="hero-preview-3" class="w-14 h-14 sm:w-20 sm:h-20 rounded-lg border-2 border-slate-900 rpg-pedestal-bg p-0.5 overflow-hidden"></div>
-            <span class="mt-1.5 font-extrabold text-amber-300 text-xs sm:text-sm">星光聖女</span>
+            <span class="mt-1 font-extrabold text-amber-300 text-xs sm:text-sm">星光聖女</span>
           </div>
         </div>
       </div>
 
       <!-- 可折疊 Google Form 設定 -->
-      <details class="w-full max-w-md text-slate-400 text-xs bg-slate-800/90 p-2 rounded-lg border border-slate-700">
+      <details class="w-full max-w-md text-slate-400 text-xs bg-slate-800/90 px-2.5 py-1.5 rounded-lg border border-slate-700 shrink-0">
         <summary class="cursor-pointer text-slate-300 font-bold hover:text-amber-400">⚙️ 教師專用：Google Form 自動紀錄設定</summary>
-        <div class="mt-2 space-y-1.5">
+        <div class="mt-1.5 space-y-1 max-h-28 overflow-y-auto pr-1">
           <div>
             <label class="block text-[10px]">表單回應 URL (action endpoint):</label>
             <input type="text" id="gform-url" value="https://docs.google.com/forms/d/e/1FAIpQLSfhsIItFh878kFK7_KYMIrwKm8YXltbS4RPQa83QB6oQxciPQ/formResponse" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs">
           </div>
-          <div class="grid grid-cols-2 gap-1.5">
+          <div class="grid grid-cols-2 gap-1">
             <div><label class="block text-[10px]">姓名 Entry ID:</label><input type="text" id="gform-entry-name" value="entry.1390982118" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
             <div><label class="block text-[10px]">班別 Entry ID:</label><input type="text" id="gform-entry-class" value="entry.656823273" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
             <div><label class="block text-[10px]">錯誤數 Entry ID:</label><input type="text" id="gform-entry-errors" value="entry.642911833" class="w-full p-1 bg-slate-900 border border-slate-600 rounded text-white text-xs"></div>
@@ -170,17 +195,17 @@
         </div>
       </details>
 
-      <button onclick="startGame()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xl sm:text-2xl px-10 py-3 rounded-xl tracking-wider my-1">
+      <button onclick="startGame()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-lg sm:text-xl px-9 py-2.5 rounded-xl tracking-wider shrink-0">
         ⚔️ 開始冒險 ⚔️
       </button>
     </div>
 
 
     <!-- ================= 2. 遊戲主要戰鬥與周界計算畫面 ================= -->
-    <div id="screen-game" class="hidden w-full h-full flex flex-col justify-between overflow-hidden gap-1.5 sm:gap-2">
+    <div id="screen-game" class="hidden w-full h-full flex flex-col justify-between overflow-hidden gap-1.5">
       
       <!-- ① 頂部 HUD 狀態欄 -->
-      <div class="h-[42px] sm:h-[46px] bg-slate-900/95 px-2 sm:px-3 py-1 rounded-lg border-2 border-slate-700 flex items-center justify-between shadow-md shrink-0">
+      <div class="h-[40px] sm:h-[44px] bg-slate-900/95 px-2 sm:px-3 py-1 rounded-lg border-2 border-slate-700 flex items-center justify-between shadow-md shrink-0">
         <!-- 生命值與攻擊力 -->
         <div class="flex items-center space-x-1.5 sm:space-x-2">
           <div id="hearts-container" class="flex space-x-0.5"></div>
@@ -250,7 +275,7 @@
           <!-- 軟尺／繩段展開結果浮層（當完成量度時顯示於畫布底部） -->
           <div id="unfold-banner" class="hidden w-full bg-slate-900/95 border-t-2 border-amber-400 px-2 py-1 shrink-0 z-10">
             <div id="unfold-warn-text" class="hidden text-center text-xs sm:text-sm font-bold text-rose-300 py-0.5"></div>
-            <canvas id="unfoldCanvas" class="hidden w-full h-[38px] block"></canvas>
+            <canvas id="unfoldCanvas" class="hidden w-full h-[36px] block"></canvas>
           </div>
         </div>
 
@@ -275,22 +300,22 @@
       </div>
 
       <!-- ③ 下方：作答位置 + 一旁的輔助工具選項 -->
-      <div class="min-h-[78px] sm:min-h-[86px] bg-slate-900/95 p-1.5 sm:p-2 rounded-xl border-2 border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 shrink-0">
+      <div class="min-h-[68px] sm:min-h-[72px] bg-slate-900/95 p-1.5 sm:p-2 rounded-xl border-2 border-slate-700 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-1.5 sm:gap-2 shrink-0">
         
         <!-- 作答位置（左側/主要輸入區） -->
-        <div class="flex items-center justify-center md:justify-start gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border-2 border-amber-400 shrink-0">
-          <span class="text-amber-300 font-black text-base sm:text-xl whitespace-nowrap">周界 =</span>
+        <div class="flex items-center justify-center md:justify-start gap-2 bg-slate-800 px-2.5 py-1 rounded-xl border-2 border-amber-400 shrink-0">
+          <span class="text-amber-300 font-black text-base sm:text-lg whitespace-nowrap">周界 =</span>
           <input type="number" id="ans-input" inputmode="numeric" pattern="[0-9]*" placeholder="?" min="1" max="99"
             onkeydown="if(event.key==='Enter') checkAnswer()"
-            class="w-20 sm:w-24 h-11 sm:h-12 rounded-lg bg-slate-950 text-amber-300 border-2 border-amber-400 text-center text-2xl sm:text-3xl font-black focus:outline-none focus:ring-2 focus:ring-amber-300">
-          <span class="text-white font-black text-base sm:text-xl">cm</span>
-          <button onclick="checkAnswer()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-xl px-4 sm:px-6 h-11 sm:h-12 rounded-xl whitespace-nowrap ml-1">
+            class="w-18 sm:w-22 h-10 sm:h-11 rounded-lg bg-slate-950 text-amber-300 border-2 border-amber-400 text-center text-xl sm:text-2xl font-black focus:outline-none focus:ring-2 focus:ring-amber-300">
+          <span class="text-white font-black text-base sm:text-lg">cm</span>
+          <button onclick="checkAnswer()" class="pixel-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-lg px-4 sm:px-5 h-10 sm:h-11 rounded-xl whitespace-nowrap ml-1">
             ⚔️ 攻擊
           </button>
         </div>
 
         <!-- 一旁的輔助工具選項（方格工具、軟尺、繩段） -->
-        <div class="flex-1 flex items-center justify-between gap-1.5 sm:gap-2 bg-slate-800/90 px-2.5 py-1.5 rounded-xl border-2 border-sky-500/60 min-w-0">
+        <div class="flex-1 flex items-center justify-between gap-1.5 sm:gap-2 bg-slate-800/90 px-2.5 py-1 rounded-xl border-2 border-sky-500/60 min-w-0">
           <div class="flex items-center gap-1.5 shrink-0">
             <span class="text-sky-300 font-extrabold text-xs sm:text-sm hidden lg:inline">🛠️ 輔助工具：</span>
             <button id="tool-grid" onclick="toggleTool('grid')" class="pixel-btn tool-toggle bg-slate-700 hover:bg-slate-600 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-extrabold flex items-center gap-1">
@@ -323,7 +348,7 @@
 
 
     <!-- ================= 3. 特教動態鷹架 Modal ================= -->
-    <div id="modal-scaffold" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div id="modal-scaffold" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="bg-slate-800 border-4 border-amber-400 rounded-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 text-center shadow-2xl relative">
         <div class="text-2xl sm:text-3xl font-black text-amber-400">💡 差一點點就對了！再試試看！</div>
         
@@ -397,28 +422,31 @@ document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 const GITHUB_RAW_BASE = "https://github.com/chungsir2024-cmd/chungsir2024-cmd.github.io/blob/main/";
 const GITHUB_ALT_BASE = "https://raw.githubusercontent.com/chungsir2024-cmd/chungsir2024-cmd.github.io/main/";
 
+/* 優先載入同目錄下的新版透明底 PNG，若無則自動回退至 GitHub 倉庫 */
 function buildSpriteUrls(filename) {
   return [
-    `${GITHUB_RAW_BASE}${filename}?raw=true`,
-    `${GITHUB_ALT_BASE}${filename}`
+    filename,
+    `${GITHUB_ALT_BASE}${filename}`,
+    `${GITHUB_RAW_BASE}${filename}?raw=true`
   ];
 }
 
-/* ================= 勇者精靈圖配置 ================= */
+/* ================= 勇者精靈圖配置（統一 6行 × 8欄、1152×864 透明底 PNG） ================= */
 const HERO_SHEET_CONFIGS = [
   {
     id: 0,
     name: '熱血騎士',
     fallbackEmoji: '⚔️',
-    urls: buildSpriteUrls('knight.jpeg'),
-    x0: 287,
-    numCols: 9,
+    urls: buildSpriteUrls('knight.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: false,
     anims: {
-      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8], peakFrame: 3, lungeX: 26, frameMs: 58 },
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], peakFrame: 3, lungeX: 26, frameMs: 62 },
       hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5] },
-      knockdown: { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     },
     slashSVG: `<path d="M 10 90 L 90 10 L 80 5 L 5 85 Z" fill="#f59e0b" stroke="#000" stroke-width="4"/><path d="M 22 92 L 92 22 L 86 18 L 16 88 Z" fill="#38bdf8" stroke="#000" stroke-width="3"/>`
   },
@@ -426,15 +454,16 @@ const HERO_SHEET_CONFIGS = [
     id: 1,
     name: '魔法女傑',
     fallbackEmoji: '🔮',
-    urls: buildSpriteUrls('mage.jpeg'),
-    x0: 287,
-    numCols: 9,
+    urls: buildSpriteUrls('mage.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: false,
     anims: {
-      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 7, 8], peakFrame: 5, lungeX: 10, frameMs: 65 },
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], peakFrame: 4, lungeX: 10, frameMs: 65 },
       hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5] },
-      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     },
     slashSVG: `<circle cx="52" cy="50" r="28" fill="#f97316" stroke="#000" stroke-width="4"/><circle cx="52" cy="50" r="18" fill="#fde047" stroke="#ea580c" stroke-width="3"/><path d="M 12 32 L 32 45 L 14 54 Z M 10 62 L 30 56 L 16 74 Z" fill="#fb923c" stroke="#000" stroke-width="2.5"/>`
   },
@@ -442,15 +471,16 @@ const HERO_SHEET_CONFIGS = [
     id: 2,
     name: '森林遊俠',
     fallbackEmoji: '🏹',
-    urls: buildSpriteUrls('ranger.jpeg'),
-    x0: 287,
-    numCols: 9,
+    urls: buildSpriteUrls('ranger.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: false,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
-      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5], peakFrame: 4, lungeX: 8, frameMs: 75 },
-      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
-      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], peakFrame: 4, lungeX: 8, frameMs: 68 },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     },
     slashSVG: `<path d="M 10 50 L 76 50" stroke="#22d3ee" stroke-width="8" stroke-linecap="round"/><path d="M 12 50 L 82 50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/><polygon points="94,50 68,35 74,50 68,65" fill="#38bdf8" stroke="#000" stroke-width="3.5"/><path d="M 28 32 Q 52 24 72 36 M 28 68 Q 52 76 72 64" fill="none" stroke="#67e8f9" stroke-width="3" stroke-linecap="round"/>`
   },
@@ -458,34 +488,36 @@ const HERO_SHEET_CONFIGS = [
     id: 3,
     name: '星光聖女',
     fallbackEmoji: '✨',
-    urls: buildSpriteUrls('sister.jpeg'),
-    x0: 278,
-    numCols: 9,
+    urls: buildSpriteUrls('sister.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: false,
     anims: {
-      idle:      { row: 0, cols: [0, 1, 2, 3, 4] },
-      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5], peakFrame: 3, lungeX: 20, frameMs: 75 },
-      hurt:      { row: 4, cols: [2, 3, 4, 5, 6] },
-      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+      idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      attack:    { row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], peakFrame: 3, lungeX: 20, frameMs: 68 },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     },
     slashSVG: `<path d="M 43 10 H 57 V 40 H 88 V 54 H 57 V 90 H 43 V 54 H 12 V 40 H 43 Z" fill="#fde047" stroke="#000" stroke-width="4"/><path d="M 47 16 H 53 V 44 H 82 V 50 H 53 V 84 H 47 V 50 H 18 V 44 H 47 Z" fill="#38bdf8"/>`
   }
 ];
 
-/* ================= 五關怪物精靈圖與關卡配置 ================= */
+/* ================= 五關怪物精靈圖與關卡配置（統一 6行 × 8欄、1152×864 透明底 PNG） ================= */
 const MONSTER_SHEET_CONFIGS = {
   1: {
     name: '史萊姆王',
     tierDesc: '正方形/長方形・全標尺寸',
     maxHp: 40,
     fallbackEmoji: '💧',
-    urls: buildSpriteUrls('slime.jpeg'),
-    x0: 296,
-    numCols: 9,
+    urls: buildSpriteUrls('slime.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: true,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
-      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
       knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     }
   },
@@ -494,14 +526,15 @@ const MONSTER_SHEET_CONFIGS = {
     tierDesc: '正方形/長方形・對邊只標一個尺寸',
     maxHp: 70,
     fallbackEmoji: '👺',
-    urls: buildSpriteUrls('goblin.jpeg'),
-    x0: 300,
-    numCols: 9,
+    urls: buildSpriteUrls('goblin.png'),
+    x0: 0,
+    numCols: 8,
+    numRows: 6,
     mirrorX: true,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
-      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6] },
-      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6] }
+      hurt:      { row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
+      knockdown: { row: 5, cols: [0, 1, 2, 3, 4, 5, 6, 7] }
     }
   },
   3: {
@@ -509,9 +542,10 @@ const MONSTER_SHEET_CONFIGS = {
     tierDesc: 'L形/階梯形・全標尺寸',
     maxHp: 110,
     fallbackEmoji: '💀',
-    urls: buildSpriteUrls('skeleton.jpeg'),
-    x0: 438,
+    urls: buildSpriteUrls('skeleton.png'),
+    x0: 0,
     numCols: 8,
+    numRows: 6,
     mirrorX: true,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
@@ -524,9 +558,10 @@ const MONSTER_SHEET_CONFIGS = {
     tierDesc: 'T形/U形/十字形・全標尺寸',
     maxHp: 160,
     fallbackEmoji: '🗿',
-    urls: buildSpriteUrls('golem.jpeg'),
-    x0: 352,
+    urls: buildSpriteUrls('golem.png'),
+    x0: 0,
     numCols: 8,
+    numRows: 6,
     mirrorX: true,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
@@ -539,9 +574,10 @@ const MONSTER_SHEET_CONFIGS = {
     tierDesc: '直線不規則圖形・部分對邊省略尺寸',
     maxHp: 220,
     fallbackEmoji: '🐉',
-    urls: buildSpriteUrls('dragon.jpeg'),
-    x0: 352,
+    urls: buildSpriteUrls('dragon.png'),
+    x0: 0,
     numCols: 8,
+    numRows: 6,
     mirrorX: true,
     anims: {
       idle:      { row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7] },
@@ -573,112 +609,19 @@ let monsterIdleTimer = null;
 let monsterStateLock = false;
 
 /**
- * 透過連通區域演算法去除 JPEG 外部灰白棋盤格底紋，保留角色高光與銀白細節
+ * 通用透明底精靈圖切片函數（直接讀取已去背之 6×8 PNG 網格，支援水平翻轉）
  */
-function removeCheckerboardBackground(sourceImg) {
-  const w = sourceImg.naturalWidth || sourceImg.width;
-  const h = sourceImg.naturalHeight || sourceImg.height;
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(sourceImg, 0, 0);
+function sliceSpriteSheetFrames(cfg, targetStore, sourceImg) {
+  const W = sourceImg.naturalWidth || sourceImg.width;
+  const H = sourceImg.naturalHeight || sourceImg.height;
+  const numCols = cfg.numCols || 8;
+  const numRows = cfg.numRows || 6;
+  const x0 = cfg.x0 || 0;
+  const colW = (W - x0) / numCols;
+  const rowH = H / numRows;
 
-  const imgData = ctx.getImageData(0, 0, w, h);
-  const data = imgData.data;
-  const total = w * h;
-
-  const isGrayCand = new Uint8Array(total);
-  const satArr = new Uint8Array(total);
-  const meanArr = new Uint8Array(total);
-
-  for (let i = 0; i < total; i++) {
-    const idx = i * 4;
-    const r = data[idx], g = data[idx + 1], b = data[idx + 2];
-    const maxC = Math.max(r, g, b);
-    const minC = Math.min(r, g, b);
-    const sat = maxC - minC;
-    const meanV = Math.round((r + g + b) / 3);
-    satArr[i] = sat;
-    meanArr[i] = meanV;
-    if (sat < 26 && meanV > 165) {
-      isGrayCand[i] = 1;
-    }
-  }
-
-  const visited = new Uint8Array(total);
-  const isTrueBg = new Uint8Array(total);
-  const queue = new Int32Array(total);
-  const dx = [-1, 1, 0, 0, -1, 1, -1, 1];
-  const dy = [0, 0, -1, 1, -1, -1, 1, 1];
-
-  for (let start = 0; start < total; start++) {
-    if (!isGrayCand[start] || visited[start]) continue;
-    let head = 0, tail = 0;
-    queue[tail++] = start;
-    visited[start] = 1;
-
-    while (head < tail) {
-      const curr = queue[head++];
-      const cx = curr % w;
-      const cy = (curr - cx) / w;
-      for (let d = 0; d < 8; d++) {
-        const nx = cx + dx[d];
-        const ny = cy + dy[d];
-        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-          const nIdx = ny * w + nx;
-          if (isGrayCand[nIdx] && !visited[nIdx]) {
-            visited[nIdx] = 1;
-            queue[tail++] = nIdx;
-          }
-        }
-      }
-    }
-
-    if (tail > 5000) {
-      for (let k = 0; k < tail; k++) {
-        isTrueBg[queue[k]] = 1;
-      }
-    }
-  }
-
-  for (let i = 0; i < total; i++) {
-    if (isTrueBg[i]) {
-      data[i * 4 + 3] = 0;
-    } else if (satArr[i] < 30 && meanArr[i] > 140) {
-      const x = i % w;
-      const y = (i - x) / w;
-      let bgNeighbors = 0;
-      for (let d = 0; d < 8; d++) {
-        const nx = x + dx[d], ny = y + dy[d];
-        if (nx >= 0 && nx < w && ny >= 0 && ny < h && isTrueBg[ny * w + nx]) {
-          bgNeighbors++;
-        }
-      }
-      if (bgNeighbors >= 2) {
-        data[i * 4 + 3] = 0;
-      } else if (bgNeighbors === 1) {
-        data[i * 4 + 3] = 70;
-      }
-    }
-  }
-
-  ctx.putImageData(imgData, 0, 0);
-  return canvas;
-}
-
-/**
- * 通用精靈圖切片函數（支援勇者與怪物、不同欄數與水平翻轉）
- */
-function sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas) {
-  const W = cleanCanvas.width;
-  const H = cleanCanvas.height;
-  const numCols = cfg.numCols || 9;
-  const colW = (W - cfg.x0) / numCols;
-  const rowH = H / 6.0;
-
-  const outW = Math.ceil(colW) + 4;
-  const outH = Math.ceil(rowH) + 4;
+  const outW = Math.round(colW);
+  const outH = Math.round(rowH);
 
   const sliceSpec = (spec) => {
     if (!spec) return [];
@@ -688,7 +631,7 @@ function sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas) {
     const frames = [];
 
     for (const c of spec.cols) {
-      const sx = Math.max(0, Math.round(cfg.x0 + c * colW));
+      const sx = Math.max(0, Math.round(x0 + c * colW));
       const sw = Math.min(W - sx, Math.round(colW));
       const dstX = Math.floor((outW - sw) / 2);
 
@@ -702,10 +645,10 @@ function sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas) {
         fCtx.save();
         fCtx.translate(outW, 0);
         fCtx.scale(-1, 1);
-        fCtx.drawImage(cleanCanvas, sx, sy, sw, sh, dstX, dstY, sw, sh);
+        fCtx.drawImage(sourceImg, sx, sy, sw, sh, dstX, dstY, sw, sh);
         fCtx.restore();
       } else {
-        fCtx.drawImage(cleanCanvas, sx, sy, sw, sh, dstX, dstY, sw, sh);
+        fCtx.drawImage(sourceImg, sx, sy, sw, sh, dstX, dstY, sw, sh);
       }
       frames.push(fCanvas.toDataURL('image/png'));
     }
@@ -722,11 +665,13 @@ function sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas) {
 function loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx = 0) {
   if (!cfg || urlIdx >= cfg.urls.length) return;
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  const targetUrl = cfg.urls[urlIdx];
+  if (/^https?:\/\//i.test(targetUrl)) {
+    img.crossOrigin = 'anonymous';
+  }
   img.onload = () => {
     try {
-      const cleanCanvas = removeCheckerboardBackground(img);
-      sliceSpriteSheetFrames(cfg, targetStore, cleanCanvas);
+      sliceSpriteSheetFrames(cfg, targetStore, img);
       if (typeof onReadyCallback === 'function') onReadyCallback();
     } catch (err) {
       console.warn(`${cfg.name}精靈圖處理失敗，嘗試備援網址:`, err);
@@ -736,7 +681,7 @@ function loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx = 0) {
   img.onerror = () => {
     loadSpriteSheet(cfg, targetStore, onReadyCallback, urlIdx + 1);
   };
-  img.src = cfg.urls[urlIdx];
+  img.src = targetUrl;
 }
 
 function applySpriteFrame(el, store, fallbackEmoji, animType, frameIdx) {
@@ -1510,6 +1455,14 @@ function sendToGoogleForm(data) {
     body: formData
   }).catch(e => console.log('Google Form send attempt:', e));
 }
+
+// 視窗尺寸或平板旋轉變更時自動重新排版畫布
+window.addEventListener('resize', () => {
+  const screenGame = document.getElementById('screen-game');
+  if (screenGame && !screenGame.classList.contains('hidden') && typeof resizeAndLayoutCanvas === 'function') {
+    resizeAndLayoutCanvas();
+  }
+});
 
 // 預載四大勇者精靈圖
 for (let i = 0; i < 4; i++) {
